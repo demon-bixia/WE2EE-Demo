@@ -1,0 +1,32 @@
+services:
+  # express service
+  server:
+    # build the image using the Dockerfile
+    build: ./server
+    # execute this command to start this service
+    command: npm run dev
+    # bind this directory with /app/server in container
+    volumes:
+      - ./server:/app/server
+      - /app/server/node_modules
+    # bind port 3000 in local machine with port 3000 in container
+    ports:
+      - 3000:3000
+    # don't run this service before mongo
+    depends_on:
+      - db
+
+  # mongodb service
+  db:
+    # build the container from this image
+    image: mongo
+    # bind port 27017 in the local machine to port 27017 in the container
+    ports:
+      - 27017:27017
+    # presist mongodb data in the /data/db directory in container
+    volumes:
+      - mongo-data:/data/db
+
+# list all named volumes in here
+volumes:
+  mongo-data:
