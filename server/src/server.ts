@@ -3,10 +3,13 @@
  */
 
 import cookieParser from 'cookie-parser';
+import cors from 'cors';
 import express, { NextFunction, Request, Response } from 'express';
 import helmet from 'helmet';
+import { createServer } from 'http';
 import logger from 'jet-logger';
 import morgan from 'morgan';
+import { Server } from 'socket.io';
 
 import 'express-async-errors';
 
@@ -19,10 +22,14 @@ import HttpStatusCodes from '@src/constants/HttpStatusCodes';
 import { NodeEnvs } from '@src/constants/misc';
 import { RouteError } from '@src/other/classes';
 
+import JWTMiddleware from '@src/middlewares/JWTMiddleware';
+
 
 // **** Variables **** //
 
 const app = express();
+const server = createServer(app);
+export const io = new Server(server);
 
 
 // **** Setup **** //
@@ -41,6 +48,15 @@ if (EnvVars.NodeEnv === NodeEnvs.Dev.valueOf()) {
 if (EnvVars.NodeEnv === NodeEnvs.Production.valueOf()) {
   app.use(helmet());
 }
+
+// CORS
+app.use(cors({
+  origin: EnvVars.CORS.AllowOrigin,
+  optionsSuccessStatus: EnvVars.CORS.OptionsSuccessStatus
+}));
+
+
+// **** Routes **** //
 
 // Add APIs, must be after middleware
 app.use(Paths.Base, BaseRouter);
@@ -62,6 +78,9 @@ app.use((
   }
   return res.status(status).json({ error: err.message });
 });
+
+// Share user context with socket.io server
+io.engine.use(JWTMiddleware);
 
 
 // **** Export default **** //

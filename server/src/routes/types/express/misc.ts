@@ -7,6 +7,7 @@ import * as e from 'express';
 export interface IReq<T = any> extends e.Request {
   body: T;
   user?: { username: string };
+  _query: any
 }
 
 export interface IRes extends e.Response {

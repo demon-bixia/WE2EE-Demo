@@ -3,7 +3,7 @@ import type { IReq, IRes } from '@src/routes/types/express/misc';
 import { createHash } from 'crypto';
 
 import UserModel from '@src/models/UserModel';
-import JWTUtil from '@src/util/JWTUtil';
+import JWTUtil from '@src/utils/JWTUtil';
 import HttpStatusCodes from '@src/constants/HttpStatusCodes';
 
 

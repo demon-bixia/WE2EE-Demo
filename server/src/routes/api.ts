@@ -28,7 +28,7 @@ userRouter.get(
 userRouter.patch(
   Paths.Users.Update,
   validate(['user', isUser]),
-  JwtMiddleware,
+  JwtMiddleware.AuthenticateToken,
   UserRoutes.updateOne,
 );
 

@@ -21,9 +21,14 @@ export default {
       secure: (process.env.SECURE_COOKIE === 'true'),
     },
   },
-  Jwt: {
+  JWT: {
     Secret: (process.env.JWT_SECRET ?? ''),
     Exp: (process.env.COOKIE_EXP ?? ''), // exp at the same time as the cookie
   },
+  CORS: {
+    AllowOrigin: (process.env.ALLOW_ORIGIN ?? ''),
+    OptionsSuccessStatus: +(process.env.OPTIONS_SUCCESS_STATUS ?? 204)
+  },
   Mongo: { connectionString: process.env.MONGO_URI ?? '' },
+  Redis: { connectionString: process.env.REDIS_URI ?? '' }
 } as const;

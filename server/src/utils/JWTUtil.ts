@@ -10,14 +10,14 @@ import envVars from '@src/constants/EnvVars';
  * generate a new token using the username as data
  */
 function generateAccessToken(user: { username: string }) {
-  return jwt.sign(user, envVars.Jwt.Secret, { expiresIn: '3600s' });
+  return jwt.sign(user, envVars.JWT.Secret, { expiresIn: '3600s' });
 }
 
 /**
  * test if the token is valid
  */
 function verifyToken(token: string) {
-  return new Promise<{ username: string } | undefined>((resolve, reject) => jwt.verify(token, envVars.Jwt.Secret,
+  return new Promise<{ username: string } | undefined>((resolve, reject) => jwt.verify(token, envVars.JWT.Secret,
     (error: VerifyErrors | null, decoded: string | undefined | JwtPayload) => error ? reject(undefined) : resolve((decoded as { username: string }))));
 }
 

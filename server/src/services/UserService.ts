@@ -5,7 +5,7 @@ import type { IReq } from '@src/routes/types/express/misc';
 import HttpStatusCodes from '@src/constants/HttpStatusCodes';
 import { RouteError } from '@src/other/classes';
 
-import UserRepo from '@src/repos/UserRepo';
+import UserModel from '@src/models/UserModel';
 
 
 // **** Variables **** //
@@ -14,13 +14,15 @@ export const USER_NOT_FOUND_ERR = 'User not found';
 export const INVALID_VALUES_ERR = 'Unable to update user with the values provided';
 export const USER_NOT_AUTHORIZED_ERR = 'You are not authorized to update this user';
 
+
 // **** Functions **** //
 
 /**
  * get one user.
  */
 async function getOne(username: string): Promise<IUser | null> {
-  const query = await UserRepo.getOne(username);
+  const query = await UserModel.findOne({ username: username })
+    .select({ password: 0, _id: 0 }).lean().exec();
   if (!query) {
     throw new RouteError(
       HttpStatusCodes.NOT_FOUND,
@@ -35,7 +37,8 @@ async function getOne(username: string): Promise<IUser | null> {
  */
 async function updateOne(req: IReq, user: IUser): Promise<UpdateWriteOpResult> {
   // check if user exits
-  const getQuery = await UserRepo.getOne(user.username);
+  const getQuery = await UserModel.findOne({ username: user.username })
+    .select({ password: 0, _id: 0 }).lean().exec();
   if (!getQuery)
     throw new RouteError(
       HttpStatusCodes.NOT_FOUND,
@@ -57,7 +60,7 @@ async function updateOne(req: IReq, user: IUser): Promise<UpdateWriteOpResult> {
     );
 
   // update user
-  const updateQuery = await UserRepo.update(user.username, user);
+  const updateQuery = await UserModel.updateOne({ username: user.username }, user);
   if (updateQuery.matchedCount === 0)
     throw new RouteError(
       HttpStatusCodes.BAD_REQUEST,

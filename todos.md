@@ -8,14 +8,16 @@
 - [x] login - alice or bob
 - [x] upload my keys
 - [x] request some keys
-- [] exchange messages with sockets.
+- [x] exchange messages with sockets.
+- [x] cors
 
 
 ### client
 
-1. login screen
-2. messaging screen
-
+- [x] login screen
+- [] messaging screen
+- [] verification modal
+- [] session screen
 
 ### library
 
