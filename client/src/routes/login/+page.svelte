@@ -1,11 +1,11 @@
 <script lang="ts">
-	import { Icon, ArrowLongRight } from 'svelte-hero-icons';
-	import Alice from '../../assets/vectors/avatars/alice.svg';
-	import Bob from '../../assets/vectors/avatars/bob.svg';
-	import XPattern from '../../assets/vectors/doodles/x-pattern.svg';
-	import Grid from '../../assets/vectors/doodles/grid.svg';
+	import { ArrowLongRight, Icon } from 'svelte-hero-icons';
+	import Alice from '../../assets/vectors/avatars/regular/alice.svg';
+	import Bob from '../../assets/vectors/avatars/regular/bob.svg';
 	import Circle from '../../assets/vectors/doodles/circle.svg';
+	import Grid from '../../assets/vectors/doodles/grid.svg';
 	import Triangle from '../../assets/vectors/doodles/triangle.svg';
+	import XPattern from '../../assets/vectors/doodles/x-pattern.svg';
 </script>
 
 <div class="page-container">
@@ -102,12 +102,12 @@
 		flex-direction: column;
 		align-items: center;
 		width: 60%;
-		padding-top: 32px;
+		padding-top: 2rem;
 	}
 
 	.title {
 		text-align: center;
-		margin-bottom: 12px;
+		margin-bottom: 0.75rem;
 	}
 
 	.description {
@@ -122,7 +122,7 @@
 	}
 
 	.login-container {
-		gap: 150px;
+		gap: 9.375rem;
 	}
 
 	.grid-pattern-wrapper {
@@ -133,24 +133,20 @@
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		border-radius: 12px;
-		padding: 40px 70px;
+		border-radius: 0.75rem;
+		padding: 2.5rem 4.375rem;
 		box-shadow: 0 0.3125rem 0.9375rem rgba(0, 0, 0, 0.1);
 		transition: box-shadow 200ms ease;
 		background: #ffffff;
 	}
 
 	.account:hover {
-		box-shadow: 0 0.625rem 1.875rem rgba(0, 0, 0, 0.1);
+		box-shadow: 0 0.625rem 1.875rem rgba(0, 0, 0, 0.2);
 	}
 
 	.account .avatar,
 	.account .name {
-		margin-bottom: 24px;
-	}
-
-	.account .icon {
-		color: red;
+		margin-bottom: 1.5rem;
 	}
 
 	.grid-pattern-1 {
@@ -171,8 +167,8 @@
 		display: flex;
 		justify-content: center;
 		align-items: center;
-		padding: 24px 0px;
+		padding: 1.5rem 0rem;
 		width: 100%;
-		border-top: 1px solid rgba(0, 0, 0, 0.1);
+		border-top: 0.0625rem solid rgba(0, 0, 0, 0.1);
 	}
 </style>

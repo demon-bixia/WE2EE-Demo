@@ -3,7 +3,12 @@
 :root {
   font-family: "Inter", sans-serif;
   font-style: normal;
+  --light-blue: #EBEFFA;
+  --light-green: #E5FFE7;
+  --light-gray: #F7F7F7;
   --blue: #597ED4;
+  --green: #00F20A;
+  --dark-blue: #415C9B;
 }
 
 /**** Elements ****/
@@ -12,8 +17,19 @@ body {
   margin: 0;
 }
 
+ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
 a {
   color: var(--blue);
+}
+
+h1,
+p {
+  margin: 0;
 }
 
 button {
@@ -23,7 +39,7 @@ button {
 }
 
 button:focus {
-  outline: 1px solid var(--blue);
+  outline: .0625rem solid var(--blue);
 }
 
 /**** Heading Text ****/
@@ -31,26 +47,30 @@ button:focus {
 .heading-1 {
   font-size: 1.75rem;
   font-weight: 600;
-  line-height: 2.5rem;
-  margin: 0;
+  line-height: 160%;
   color: rgba(0, 0, 0, 0.60);
 }
 
+.heading-2 {
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 160%;
+  color: rgba(0, 0, 0, 0.60);
+}
 
 /**** Body Text ****/
 
 .body-1 {
   font-size: 1rem;
   font-weight: 400;
-  line-height: 1.5rem;
-  margin: 0;
+  line-height: 160%;
   color: rgba(0, 0, 0, 0.60);
 }
 
 .body-2 {
   font-size: 1.25rem;
   font-weight: 400;
-  line-height: 1.5rem;
+  line-height: 160%;
   margin: 0;
   color: rgba(0, 0, 0, 0.60);
 }

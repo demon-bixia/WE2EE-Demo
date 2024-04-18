@@ -2,7 +2,6 @@
 
 - The thesis should be about a model for end to end encryption on the web.
 
-
 ### server
 
 - [x] login - alice or bob
@@ -18,6 +17,7 @@
 - [] messaging screen
 - [] verification modal
 - [] session screen
+
 
 ### library
 
