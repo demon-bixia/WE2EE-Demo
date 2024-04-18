@@ -34,6 +34,9 @@
 		color: rgba(0, 0, 0, 0.6);
 		padding: 6px 16px;
 		transition: all 200ms ease;
+		text-align: start;
+		font-size: 16px;
+		line-height: 160%;
 	}
 
 	:global(.dropdown-menu .menu-item:hover) {
@@ -42,9 +45,11 @@
 
 	:global(.dropdown-menu .menu-item:focus) {
 		background-color: rgba(0, 0, 0, 0.03);
+		outline: none;
 	}
 
 	:global(.dropdown-menu .menu-item:active) {
 		background-color: rgba(0, 0, 0, 0.1);
+		outline: none;
 	}
 </style>

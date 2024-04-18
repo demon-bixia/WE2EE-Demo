@@ -14,8 +14,8 @@
 ### client
 
 - [x] login screen
-- [] messaging screen
-- [] verification modal
+- [x] messaging screen
+- [x] verification modal
 - [] session screen
 
 

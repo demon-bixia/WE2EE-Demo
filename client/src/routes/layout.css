@@ -6,8 +6,10 @@
   --light-blue: #EBEFFA;
   --light-green: #E5FFE7;
   --light-gray: #F7F7F7;
+  --light-red: #FFEAEA;
   --blue: #597ED4;
   --green: #00F20A;
+  --red: #ff7171;
   --dark-blue: #415C9B;
 }
 
@@ -49,6 +51,8 @@ button:focus {
   font-weight: 600;
   line-height: 160%;
   color: rgba(0, 0, 0, 0.60);
+  padding: 0;
+  margin: 0;
 }
 
 .heading-2 {
@@ -56,7 +60,10 @@ button:focus {
   font-weight: 600;
   line-height: 160%;
   color: rgba(0, 0, 0, 0.60);
+  padding: 0;
+  margin: 0;
 }
+
 
 /**** Body Text ****/
 

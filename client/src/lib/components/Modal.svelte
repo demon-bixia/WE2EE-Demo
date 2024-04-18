@@ -1,0 +1,24 @@
+<script lang="ts">
+	import { fade, scale } from 'svelte/transition';
+
+	export let open: boolean = false;
+</script>
+
+{#if open}
+	<div class="overlay" transition:fade={{ duration: 100 }}>
+		<slot></slot>
+	</div>
+{/if}
+
+<style>
+	.overlay {
+		position: absolute;
+		width: 100%;
+		height: 100%;
+		background: rgba(0, 0, 0, 0.5);
+		backdrop-filter: blur(20px);
+		display: flex;
+		justify-content: center;
+		align-items: center;
+	}
+</style>

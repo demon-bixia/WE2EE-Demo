@@ -1,13 +1,20 @@
 <script lang="ts">
 	import Dropdown from '$lib/components/Dropdown.svelte';
-	import { EllipsisHorizontal, Icon, PaperAirplane, MagnifyingGlass } from 'svelte-hero-icons';
-	import Bob from '../assets/vectors/avatars/round/bob-round.svg';
 	import LogEntry from '$lib/components/LogEntry.svelte';
+	import Modal from '$lib/components/Modal.svelte';
+	import { EllipsisHorizontal, Icon, MagnifyingGlass, PaperAirplane } from 'svelte-hero-icons';
+	import Bob from '../assets/vectors/avatars/round/bob-round.svg';
 
 	let displayMenu = false;
-
+	// (event) open the chat dropdown menu
 	function handleToggleMenu() {
 		displayMenu = !displayMenu;
+	}
+
+	let OpenVerificationModal = false;
+	// (event) open the verification
+	function handleToggleVerificationModal() {
+		OpenVerificationModal = !OpenVerificationModal;
 	}
 
 	let FAKE_DATA = [
@@ -56,14 +63,17 @@
 				</button>
 				{#if displayMenu}
 					<Dropdown handleClickOutside={handleToggleMenu}>
-						<a on:click={handleToggleMenu} class="menu-item" href="#">Sessions</a>
-						<a on:click={handleToggleMenu} class="menu-item" href="#">ID Verification</a>
-						<a on:click={handleToggleMenu} class="menu-item" href="#">Logout</a>
+						<button on:click={handleToggleMenu} class="menu-item">Sessions</button>
+						<button
+							on:click={handleToggleMenu}
+							on:click={handleToggleVerificationModal}
+							class="menu-item">ID Verification</button
+						>
+						<button on:click={handleToggleMenu} class="menu-item">Logout</button>
 					</Dropdown>
 				{/if}
 			</div>
 		</div>
-
 		<!--middle section of chat-->
 		<div class="middle">
 			<div class="message self">
@@ -88,7 +98,6 @@
 				<p class="text">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod</p>
 			</div>
 		</div>
-
 		<!--bottom section of chat-->
 		<div class="bottom">
 			<input
@@ -132,6 +141,20 @@
 			</p>
 		</footer>
 	</aside>
+
+	<Modal open={OpenVerificationModal}>
+		<div class="modal">
+			<header class="header">
+				<h6 class="heading-2 title">Confirm Identity of user</h6>
+				<p class="body-1 description">Ask the other part to confirm this code on thier device.</p>
+			</header>
+			<div class="code-container body-1">
+				Code:
+				<p class="code body-1">1201920801222210282741023</p>
+			</div>
+			<button class="close-button" on:click={handleToggleVerificationModal}>Close</button>
+		</div>
+	</Modal>
 </div>
 
 <style>
@@ -311,5 +334,61 @@
 		border-top: 0.0625rem solid rgba(0, 0, 0, 0.1);
 		height: 84px;
 		box-sizing: border-box;
+	}
+
+	.modal {
+		padding: 24px 16px;
+		background: #ffffff;
+		border-radius: 12px;
+		width: 300px;
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		align-items: center;
+		gap: 24px;
+	}
+
+	.modal .header {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+	}
+
+	.modal .header .title,
+	.modal .header .description {
+		text-align: center;
+	}
+
+	.modal .code-container {
+		width: 100%;
+	}
+
+	.modal .code {
+		background: var(--light-gray);
+		padding: 16px;
+		margin-top: 8px;
+		border-radius: 16px;
+	}
+
+	.modal .close-button {
+		font-size: 16px;
+		color: rgba(0, 0, 0, 0.6);
+		padding: 16px;
+		width: 200px;
+		border-radius: 12px;
+		border: 1px solid rgba(0, 0, 0, 0.1);
+		transition: all 200ms ease;
+	}
+
+	.modal .close-button:hover {
+		border: 1px solid var(--light-red);
+		color: var(--red);
+	}
+
+	.modal .close-button:focus {
+		box-shadow: 0 0 0.0625rem 0.1875rem var(--light-red);
+		border: 1px solid var(--light-red);
+		color: var(--red);
+		outline: none;
 	}
 </style>
