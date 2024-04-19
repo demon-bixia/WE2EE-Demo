@@ -8,7 +8,7 @@
 	import XPattern from '../../assets/vectors/doodles/x-pattern.svg';
 </script>
 
-<div class="page-container">
+<section class="page-container">
 	<img class="x-pattern" src={XPattern} alt="x pattern" />
 	<img class="shape circle-left" src={Circle} alt="circle shape" />
 	<img class="shape circle-right" src={Circle} alt="circle shape" />
@@ -54,14 +54,14 @@
 			</a>
 		</p>
 	</footer>
-</div>
+</section>
 
 <style>
 	.page-container {
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		justify-content: center;
+		justify-content: space-between;
 		height: 100vh;
 	}
 
@@ -152,14 +152,14 @@
 	.grid-pattern-1 {
 		position: absolute;
 		z-index: -1;
-		bottom: 71%;
+		bottom: 73%;
 		right: 10%;
 	}
 
 	.grid-pattern-2 {
 		position: absolute;
 		z-index: -1;
-		top: 71%;
+		top: 73%;
 		left: 10%;
 	}
 

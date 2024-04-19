@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { clickOutside } from '../actions/clickOutside';
 	import { fade } from 'svelte/transition';
+	import { clickOutside } from '../actions/clickOutside';
 
 	export let handleClickOutside: () => void;
 </script>
@@ -37,6 +37,7 @@
 		text-align: start;
 		font-size: 16px;
 		line-height: 160%;
+		justify-content: start;
 	}
 
 	:global(.dropdown-menu .menu-item:hover) {

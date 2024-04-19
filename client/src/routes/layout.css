@@ -8,7 +8,7 @@
   --light-gray: #F7F7F7;
   --light-red: #FFEAEA;
   --blue: #597ED4;
-  --green: #00F20A;
+  --green: #00be06;
   --red: #ff7171;
   --dark-blue: #415C9B;
 }
@@ -38,6 +38,13 @@ button {
   background: transparent;
   border: none;
   cursor: pointer;
+  font-size: 1rem;
+  color: rgba(0, 0, 0, 0.60);
+  line-height: 160%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
 }
 
 button:focus {

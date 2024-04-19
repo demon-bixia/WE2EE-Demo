@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Icon, ChevronDown, ChevronUp, DocumentDuplicate } from 'svelte-hero-icons';
+	import { ChevronDown, ChevronUp, DocumentDuplicate, Icon } from 'svelte-hero-icons';
 	import { slide } from 'svelte/transition';
 
 	export let data: {
@@ -42,11 +42,10 @@
 		</div>
 		{#if data.more}
 			<button class="details-button" on:click={handleToggleMoreDetails}>
+				details
 				{#if showMoreDetails}
-					hide
 					<Icon style="color:#597ED4;" src={ChevronUp} solid size="16" />
 				{:else}
-					details
 					<Icon style="color:#597ED4;" src={ChevronDown} solid size="16" />
 				{/if}
 			</button>
@@ -150,6 +149,7 @@
 		color: var(--blue);
 		height: min-content;
 		border-radius: 4px;
+		line-height: normal;
 	}
 
 	.details-button:hover {
