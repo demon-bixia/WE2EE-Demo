@@ -38,7 +38,7 @@ async function AuthenticateToken(req: IReq, res: IRes, next: Function) {
 /**
  * Authenticates jwt in websocket server 
  */
-async function WSAuthenticateToken(req: IReq, res: IRes, next: Function) {
+async function WSAuthenticateToken(req: IReq, _: IRes, next: Function) {
   const isHandshake = req._query.sid === undefined; // ensure only applied to the first session
 
   if (!isHandshake) {

@@ -6,7 +6,10 @@
 	import Modal from '$lib/components/Modal.svelte';
 	import { EllipsisHorizontal, Icon, PaperAirplane } from 'svelte-hero-icons';
 
+	import { goto } from '$app/navigation';
 	import { getContext } from 'svelte';
+
+	import Alice from '../../assets/vectors/avatars/round/alice-round.svg';
 	import Bob from '../../assets/vectors/avatars/round/bob-round.svg';
 
 	let displayMenu = false;
@@ -22,75 +25,91 @@
 	}
 
 	const globalState = getContext<Writable<IStoreData>>('globalState');
+
+	// (event) handles logging out.
+	function handleLogout() {
+		globalState.set({ loading: false, logEntries: [], messages: [] });
+		goto('/login');
+	}
 </script>
 
-<section class="chat">
-	<!--top section of chat-->
-	<div class="top">
-		<div class="contact-info">
-			<img class="avatar" src={Bob} alt="contact avatar" />
-			<div>
-				<p class="body-1 name">Bob</p>
-				<p class="body-1 status">Online</p>
+{#if $globalState.user}
+	<section class="chat">
+		<!--top section of chat-->
+		<div class="top">
+			<div class="contact-info">
+				<img
+					class="avatar"
+					src={$globalState.user.username === 'Alice' ? Alice : Bob}
+					alt="contact avatar"
+				/>
+				<div>
+					<p class="body-1 name">{$globalState.user.username}</p>
+					<p class="body-1 status" class:online={$globalState.user.status === 'Online'}>
+						{$globalState.user.status}
+					</p>
+				</div>
+			</div>
+			<div class="dropdown-menu-wrapper">
+				<button class="menu-button" on:click={handleToggleMenu}>
+					<Icon style="color:rgba(0, 0, 0, 0.6);" src={EllipsisHorizontal} solid size="24" />
+				</button>
+				{#if displayMenu}
+					<Dropdown handleClickOutside={handleToggleMenu}>
+						<a href="/chat/sessions" on:click={handleToggleMenu} class="menu-item">Sessions</a>
+						<button
+							on:click={handleToggleMenu}
+							on:click={handleToggleVerificationModal}
+							class="menu-item">ID Verification</button
+						>
+						<button on:click={handleToggleMenu} on:click={handleLogout} class="menu-item"
+							>Logout</button
+						>
+					</Dropdown>
+				{/if}
 			</div>
 		</div>
-		<div class="dropdown-menu-wrapper">
-			<button class="menu-button" on:click={handleToggleMenu}>
-				<Icon style="color:rgba(0, 0, 0, 0.6);" src={EllipsisHorizontal} solid size="24" />
+		<!--middle section of chat-->
+		<div class="middle">
+			{#each $globalState.messages as message}
+				<div
+					class="message"
+					class:self={$globalState?.user && message.from === $globalState?.user.username}
+				>
+					<p class="text">
+						{message.content}
+					</p>
+				</div>
+			{/each}
+		</div>
+		<!--bottom section of chat-->
+		<div class="bottom">
+			<input
+				class="message-input"
+				type="text"
+				placeholder="Type the messages you want to send here...."
+			/>
+			<button class="send-button">
+				Send
+				<Icon style="color:#ffffff;" src={PaperAirplane} solid size="24" />
 			</button>
-			{#if displayMenu}
-				<Dropdown handleClickOutside={handleToggleMenu}>
-					<a href="/chat/sessions" on:click={handleToggleMenu} class="menu-item">Sessions</a>
-					<button
-						on:click={handleToggleMenu}
-						on:click={handleToggleVerificationModal}
-						class="menu-item">ID Verification</button
-					>
-					<a href="/login" on:click={handleToggleMenu} class="menu-item">Logout</a>
-				</Dropdown>
-			{/if}
 		</div>
-	</div>
-	<!--middle section of chat-->
-	<div class="middle">
-		{#each $globalState.messages as message}
-			<div
-				class="message"
-				class:self={$globalState?.user && message.from === $globalState?.user.username}
-			>
-				<p class="text">
-					{message.content}
-				</p>
+		<!--modal-->
+		<Modal open={OpenVerificationModal}>
+			<div class="modal">
+				<header class="header">
+					<h6 class="heading-2 title">Confirm Identity of user</h6>
+					<p class="body-1 description">Ask the other part to confirm this code on thier device.</p>
+				</header>
+				<div class="code-container body-1">
+					Code:
+					<p class="code body-1">1201920801222210282741023</p>
+				</div>
+				<button class="close-button" on:click={handleToggleVerificationModal}>Close</button>
 			</div>
-		{/each}
-	</div>
-	<!--bottom section of chat-->
-	<div class="bottom">
-		<input
-			class="message-input"
-			type="text"
-			placeholder="Type the messages you want to send here...."
-		/>
-		<button class="send-button">
-			Send
-			<Icon style="color:#ffffff;" src={PaperAirplane} solid size="24" />
-		</button>
-	</div>
-	<!--modal-->
-	<Modal open={OpenVerificationModal}>
-		<div class="modal">
-			<header class="header">
-				<h6 class="heading-2 title">Confirm Identity of user</h6>
-				<p class="body-1 description">Ask the other part to confirm this code on thier device.</p>
-			</header>
-			<div class="code-container body-1">
-				Code:
-				<p class="code body-1">1201920801222210282741023</p>
-			</div>
-			<button class="close-button" on:click={handleToggleVerificationModal}>Close</button>
-		</div>
-	</Modal>
-</section>
+		</Modal>
+	</section>
+{/if}
 
 <style>
 	.chat {
@@ -121,8 +140,11 @@
 	.chat .top .contact-info .name {
 		margin-bottom: 0.25rem;
 	}
-
 	.chat .top .contact-info .status {
+		color: rgba(0, 0, 0, 0.4);
+	}
+
+	.chat .top .contact-info .status.online {
 		color: var(--green);
 	}
 

@@ -1,4 +1,17 @@
 services:
+  # vue service
+  client:
+    # build the container from this image
+    build: ./client
+    # execute this command to start this service
+    command: npm run dev
+    # bind this directory with /app/client in container
+    volumes:
+      - ./client:/app/client
+      - /app/client/node_modules
+    # bind port 5173 in local machine with port 5173 in container
+    ports:
+      - 5173:5173
 
   # express service
   server:

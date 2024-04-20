@@ -18,6 +18,7 @@
 - [x] add verification modal.
 - [x] add session screen.
 - [x] add state and globalStore.
+- [x] add login logic
 - [] add socket communication
 
 
@@ -26,11 +27,14 @@
 - [] implement X3DH.
 - [] implement AES message encryption.
 - [] implement EdDSA signing.
-- [] implement client storage encryption.
-- [] implement Signing & Verification
-- [] implement Sync???.
+- [] implement identity verification.
 
 
 ### client storage
 
 - [] add client storage.
+
+
+### session sync
+
+- [] implement Sync.

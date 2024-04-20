@@ -50,10 +50,7 @@ if (EnvVars.NodeEnv === NodeEnvs.Production.valueOf()) {
 }
 
 // CORS
-app.use(cors({
-  origin: EnvVars.CORS.AllowOrigin,
-  optionsSuccessStatus: EnvVars.CORS.OptionsSuccessStatus
-}));
+app.use(cors());
 
 
 // **** Routes **** //
@@ -80,7 +77,7 @@ app.use((
 });
 
 // Share user context with socket.io server
-io.engine.use(JWTMiddleware);
+io.engine.use(JWTMiddleware.WSAuthenticateToken);
 
 
 // **** Export default **** //

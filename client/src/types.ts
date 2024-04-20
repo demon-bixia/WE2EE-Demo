@@ -1,6 +1,16 @@
+export interface Session {
+  _id: number;
+}
+
 export interface IUser {
   username: string;
-  status: string;
+  status?: string;
+  authToken?: string;
+  IDK?: string;
+  SPK?: string;
+  preKeys: string[];
+  sessions: Session[];
+
 }
 
 export interface ILogEntry {

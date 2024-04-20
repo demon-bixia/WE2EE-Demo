@@ -1,4 +1,5 @@
 import type { VerifyErrors, JwtPayload } from 'jsonwebtoken';
+import type { IUser } from '@src/models/UserModel';
 
 import jwt from 'jsonwebtoken';
 import envVars from '@src/constants/EnvVars';
@@ -9,7 +10,7 @@ import envVars from '@src/constants/EnvVars';
 /**
  * generate a new token using the username as data
  */
-function generateAccessToken(user: { username: string }) {
+function generateAccessToken(user: IUser) {
   return jwt.sign(user, envVars.JWT.Secret, { expiresIn: '3600s' });
 }
 

@@ -2,7 +2,6 @@ import type { IStoreData } from "./types";
 
 const FAKE_DATA: IStoreData = {
   loading: true,
-  user: { username: "Alice", status: "Online" },
   messages: [
     {
       from: "Alice",

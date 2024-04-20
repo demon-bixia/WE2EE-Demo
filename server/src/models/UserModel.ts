@@ -10,7 +10,6 @@ export interface Session {
 export interface IUser {
   _id: Types.ObjectId;
   username: string;
-  password: string;
   IDK?: string;
   SPK?: string;
   preKeys: string[];
@@ -23,7 +22,6 @@ export interface IUser {
 // Schema
 const userSchema = new Schema<IUser>({
   username: { type: String, maxLength: 255, unique: true, index: true },
-  password: String,
   IDK: String,
   SPK: String,
   preKeys: [String],

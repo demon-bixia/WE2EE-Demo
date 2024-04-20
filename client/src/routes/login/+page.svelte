@@ -1,4 +1,12 @@
 <script lang="ts">
+	import type { Writable } from 'svelte/store';
+	import type { IStoreData, IUser } from '../../types';
+
+	import { goto } from '$app/navigation';
+	import { error } from '@sveltejs/kit';
+	import { getContext } from 'svelte';
+	import FAKE_DATA from '../../fake-data';
+
 	import { ArrowLongRight, Icon } from 'svelte-hero-icons';
 
 	import Alice from '../../assets/vectors/avatars/regular/alice.svg';
@@ -7,6 +15,40 @@
 	import Grid from '../../assets/vectors/doodles/grid.svg';
 	import Triangle from '../../assets/vectors/doodles/triangle.svg';
 	import XPattern from '../../assets/vectors/doodles/x-pattern.svg';
+
+	interface IGetTokenResponseData {
+		user?: IUser;
+		message?: string;
+		token?: string;
+	}
+
+	const globalState = getContext<Writable<IStoreData>>('globalState');
+
+	// (event): handle authenticating as alice or bob.
+	async function handleGetToken(username: string) {
+		try {
+			const response = await fetch('http://localhost:3000/api/auth/get-token', {
+				mode: 'cors',
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ username: username })
+			});
+
+			const result: IGetTokenResponseData = await response.json();
+
+			if (response.status === 200)
+				if (result.user) {
+					globalState.set({
+						...FAKE_DATA,
+						loading: false,
+						user: { ...result.user, status: 'Offline' }
+					});
+					goto('/chat');
+				} else error(response.status, result.message ? result.message : '');
+		} catch (error) {
+			if (error instanceof TypeError) throw new Error('network error encountered', error);
+		}
+	}
 </script>
 
 <section class="page-container">
@@ -27,20 +69,28 @@
 
 	<div class="login-container">
 		<div class="grid-pattern-wrapper">
-			<a href="/chat" class="account" aria-label="login as Alice">
-				<img class="avatar" src={Alice} alt="alice" />
+			<button
+				on:click={async () => await handleGetToken('Alice')}
+				class="account"
+				aria-label="login as Alice"
+			>
+				<img class="avatar" src={Alice} alt="Alice" />
 				<p class="body-2 name">Alice</p>
 				<Icon style="color:rgba(0, 0, 0, 0.6);" src={ArrowLongRight} solid size="24" />
-			</a>
+			</button>
 			<img class="grid-pattern-1" src={Grid} alt="grid-pattern" />
 		</div>
 
 		<div class="grid-pattern-wrapper">
-			<a href="/chat" class="account" aria-label="login as Bob">
-				<img class="avatar" src={Bob} alt="bob" />
+			<button
+				on:click={async () => await handleGetToken('Bob')}
+				class="account"
+				aria-label="login as Bob"
+			>
+				<img class="avatar" src={Bob} alt="Bob" />
 				<p class="body-2 name">Bob</p>
 				<Icon style="color:rgba(0, 0, 0, 0.6);" src={ArrowLongRight} solid size="24" />
-			</a>
+			</button>
 			<img class="grid-pattern-2" src={Grid} alt="grid-pattern" />
 		</div>
 	</div>

@@ -22,7 +22,7 @@ export const USER_NOT_AUTHORIZED_ERR = 'You are not authorized to update this us
  */
 async function getOne(username: string): Promise<IUser | null> {
   const query = await UserModel.findOne({ username: username })
-    .select({ password: 0, _id: 0 }).lean().exec();
+    .select({ _id: 0 }).lean().exec();
   if (!query) {
     throw new RouteError(
       HttpStatusCodes.NOT_FOUND,
@@ -38,7 +38,7 @@ async function getOne(username: string): Promise<IUser | null> {
 async function updateOne(req: IReq, user: IUser): Promise<UpdateWriteOpResult> {
   // check if user exits
   const getQuery = await UserModel.findOne({ username: user.username })
-    .select({ password: 0, _id: 0 }).lean().exec();
+    .select({ _id: 0 }).lean().exec();
   if (!getQuery)
     throw new RouteError(
       HttpStatusCodes.NOT_FOUND,

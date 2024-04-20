@@ -20,11 +20,7 @@
 		} else if ($globalState.user && window.location.pathname !== '/chat') {
 			await goto('/chat');
 		}
-
-		// after a second of mounting disable the loading indicator.
-		setTimeout(() => {
-			globalState.set({ ...$globalState, loading: false });
-		}, 1000);
+		$globalState.loading = false;
 	});
 </script>
 
