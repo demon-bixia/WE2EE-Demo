@@ -13,17 +13,24 @@
 
 ### client
 
-- [x] login screen
-- [x] messaging screen
-- [x] verification modal
-- [] session screen
+- [x] add login screen.
+- [x] add messaging screen.
+- [x] add verification modal.
+- [x] add session screen.
+- [x] add state and globalStore.
+- [] add socket communication
 
 
 ### library
 
-1. X3DH.
-2. AES.
-3. EdDSA.
-4. IndexedDB.
-5. Signing & Verification
-6. Sync???.
+- [] implement X3DH.
+- [] implement AES message encryption.
+- [] implement EdDSA signing.
+- [] implement client storage encryption.
+- [] implement Signing & Verification
+- [] implement Sync???.
+
+
+### client storage
+
+- [] add client storage.

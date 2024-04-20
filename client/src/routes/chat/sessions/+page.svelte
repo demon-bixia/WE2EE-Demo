@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Trash, Check, XMark, Icon } from 'svelte-hero-icons';
+	import { Check, Icon, XMark } from 'svelte-hero-icons';
 </script>
 
 <section class="sessions-container">
@@ -37,7 +37,7 @@
 			</div>
 		</div>
 	</div>
-	<button class="close-button">Go Back</button>
+	<a href="/chat" class="close-button">Go Back</a>
 </section>
 
 <style>
@@ -74,10 +74,10 @@
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		width: 100%;
 		box-sizing: border-box;
-		gap: 5rem;
 		height: 4.0625rem;
+		width: 100%;
+		gap: 9rem;
 	}
 
 	.sessions .session .controls {
@@ -130,11 +130,15 @@
 	}
 
 	.close-button {
+		display: flex;
+		justify-content: center;
+		align-items: center;
 		font-size: 1rem;
 		color: rgba(0, 0, 0, 0.6);
 		padding: 1rem;
 		width: 12.5rem;
 		border-radius: 1rem;
+		text-decoration: none;
 		border: 0.0625rem solid rgba(0, 0, 0, 0.1);
 		transition: all 200ms ease;
 	}

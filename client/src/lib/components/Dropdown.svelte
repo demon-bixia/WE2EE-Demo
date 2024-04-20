@@ -31,13 +31,16 @@
 
 	:global(.dropdown-menu .menu-item) {
 		text-decoration: none;
-		color: rgba(0, 0, 0, 0.6);
-		padding: 6px 16px;
-		transition: all 200ms ease;
-		text-align: start;
-		font-size: 16px;
-		line-height: 160%;
 		justify-content: start;
+		text-align: start;
+		padding: 6px 16px;
+		font-size: 16px;
+		font-weight: 400;
+		line-height: 160%;
+		color: rgba(0, 0, 0, 0.6);
+		transition: all 200ms ease;
+		box-sizing: border-box;
+		display: block;
 	}
 
 	:global(.dropdown-menu .menu-item:hover) {

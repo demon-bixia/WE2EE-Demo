@@ -1,34 +1,13 @@
 <script lang="ts">
+	import type { IStoreData } from '../../types';
+	import type { Writable } from 'svelte/store';
+
+	import { getContext } from 'svelte';
+
 	import LogEntry from '$lib/components/LogEntry.svelte';
 	import { Icon, MagnifyingGlass } from 'svelte-hero-icons';
 
-	let FAKE_DATA = [
-		{
-			date: '12:30',
-			title: 'Received Key bundle from server.',
-			more: {
-				IDKA: '705362851087197....',
-				SPKB: '7197227133138997....',
-				DH: '399775139864916....'
-			}
-		},
-		{
-			date: '12:30',
-			title: 'DH with IDKA and Bob’s SPK.'
-		},
-		{
-			date: '12:30',
-			title: 'DH with  EK  and IDKB.'
-		},
-		{
-			date: '12:30',
-			title: 'Message signed with EdDSA.'
-		},
-		{
-			date: '12:30',
-			title: 'Message encrypted with AES.'
-		}
-	];
+	const globalState = getContext<Writable<IStoreData>>('globalState');
 </script>
 
 <div class="page-container">
@@ -47,8 +26,8 @@
 		</search>
 
 		<div class="protocol-log">
-			{#each FAKE_DATA as data}
-				<LogEntry {data} />
+			{#each $globalState.logEntries as entry}
+				<LogEntry {entry} />
 			{:else}
 				<p>no events to log</p>
 			{/each}
@@ -131,7 +110,7 @@
 		padding: 1.5rem 0rem;
 		width: 100%;
 		border-top: 0.0625rem solid rgba(0, 0, 0, 0.1);
-		height: 84px;
+		height: 86px;
 		box-sizing: border-box;
 	}
 </style>

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { ArrowLongRight, Icon } from 'svelte-hero-icons';
+
 	import Alice from '../../assets/vectors/avatars/regular/alice.svg';
 	import Bob from '../../assets/vectors/avatars/regular/bob.svg';
 	import Circle from '../../assets/vectors/doodles/circle.svg';
@@ -26,20 +27,20 @@
 
 	<div class="login-container">
 		<div class="grid-pattern-wrapper">
-			<button class="account" aria-label="login as Alice">
+			<a href="/chat" class="account" aria-label="login as Alice">
 				<img class="avatar" src={Alice} alt="alice" />
 				<p class="body-2 name">Alice</p>
 				<Icon style="color:rgba(0, 0, 0, 0.6);" src={ArrowLongRight} solid size="24" />
-			</button>
+			</a>
 			<img class="grid-pattern-1" src={Grid} alt="grid-pattern" />
 		</div>
 
 		<div class="grid-pattern-wrapper">
-			<button class="account" aria-label="login as Bob">
+			<a href="/chat" class="account" aria-label="login as Bob">
 				<img class="avatar" src={Bob} alt="bob" />
 				<p class="body-2 name">Bob</p>
 				<Icon style="color:rgba(0, 0, 0, 0.6);" src={ArrowLongRight} solid size="24" />
-			</button>
+			</a>
 			<img class="grid-pattern-2" src={Grid} alt="grid-pattern" />
 		</div>
 	</div>

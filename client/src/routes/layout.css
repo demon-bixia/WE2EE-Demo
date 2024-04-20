@@ -1,7 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
 
 :root {
-  font-family: "Inter", sans-serif;
   font-style: normal;
   --light-blue: #EBEFFA;
   --light-green: #E5FFE7;
@@ -14,6 +13,9 @@
 }
 
 /**** Elements ****/
+* {
+  font-family: "Inter", sans-serif;
+}
 
 body {
   margin: 0;

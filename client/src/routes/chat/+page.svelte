@@ -1,7 +1,12 @@
 <script lang="ts">
+	import type { Writable } from 'svelte/store';
+	import type { IStoreData } from '../../types';
+
 	import Dropdown from '$lib/components/Dropdown.svelte';
 	import Modal from '$lib/components/Modal.svelte';
 	import { EllipsisHorizontal, Icon, PaperAirplane } from 'svelte-hero-icons';
+
+	import { getContext } from 'svelte';
 	import Bob from '../../assets/vectors/avatars/round/bob-round.svg';
 
 	let displayMenu = false;
@@ -15,6 +20,8 @@
 	function handleToggleVerificationModal() {
 		OpenVerificationModal = !OpenVerificationModal;
 	}
+
+	const globalState = getContext<Writable<IStoreData>>('globalState');
 </script>
 
 <section class="chat">
@@ -33,40 +40,29 @@
 			</button>
 			{#if displayMenu}
 				<Dropdown handleClickOutside={handleToggleMenu}>
-					<button on:click={handleToggleMenu} class="menu-item">Sessions</button>
+					<a href="/chat/sessions" on:click={handleToggleMenu} class="menu-item">Sessions</a>
 					<button
 						on:click={handleToggleMenu}
 						on:click={handleToggleVerificationModal}
 						class="menu-item">ID Verification</button
 					>
-					<button on:click={handleToggleMenu} class="menu-item">Logout</button>
+					<a href="/login" on:click={handleToggleMenu} class="menu-item">Logout</a>
 				</Dropdown>
 			{/if}
 		</div>
 	</div>
 	<!--middle section of chat-->
 	<div class="middle">
-		<div class="message self">
-			<p class="text">
-				Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut
-				labore et dolore magna aliqua
-			</p>
-		</div>
-		<div class="message odd">
-			<p class="text">Lorem ipsum dolor sit amet</p>
-		</div>
-		<div class="message self">
-			<p class="text">Lorem ipsum dolor sit amet, consectetur adipiscing elit</p>
-		</div>
-		<div class="message odd">
-			<p class="text">
-				Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut
-				labore et dolore magna aliqua
-			</p>
-		</div>
-		<div class="message self">
-			<p class="text">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod</p>
-		</div>
+		{#each $globalState.messages as message}
+			<div
+				class="message"
+				class:self={$globalState?.user && message.from === $globalState?.user.username}
+			>
+				<p class="text">
+					{message.content}
+				</p>
+			</div>
+		{/each}
 	</div>
 	<!--bottom section of chat-->
 	<div class="bottom">
@@ -154,16 +150,13 @@
 		padding: 1rem;
 		max-width: 60%;
 		border-radius: 0.75rem;
+		align-self: start;
+		background: var(--light-green);
 	}
 
 	.chat .middle .message.self {
 		align-self: end;
 		background: var(--light-blue);
-	}
-
-	.chat .middle .message.odd {
-		align-self: start;
-		background: var(--light-green);
 	}
 
 	.chat .bottom {
