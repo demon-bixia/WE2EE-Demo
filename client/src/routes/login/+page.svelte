@@ -1,20 +1,18 @@
 <script lang="ts">
-	import type { Writable } from 'svelte/store';
-	import type { IStoreData, IUser } from '../../types';
-
 	import { goto } from '$app/navigation';
 	import { error } from '@sveltejs/kit';
+	import { io, type Socket } from 'socket.io-client';
 	import { getContext } from 'svelte';
-	import FAKE_DATA from '../../fake-data';
-
 	import { ArrowLongRight, Icon } from 'svelte-hero-icons';
-
+	import type { Writable } from 'svelte/store';
 	import Alice from '../../assets/vectors/avatars/regular/alice.svg';
 	import Bob from '../../assets/vectors/avatars/regular/bob.svg';
 	import Circle from '../../assets/vectors/doodles/circle.svg';
 	import Grid from '../../assets/vectors/doodles/grid.svg';
 	import Triangle from '../../assets/vectors/doodles/triangle.svg';
 	import XPattern from '../../assets/vectors/doodles/x-pattern.svg';
+	import FAKE_DATA from '../../fake-data';
+	import type { IStoreData, IUser } from '../../types';
 
 	interface IGetTokenResponseData {
 		user?: IUser;
@@ -23,6 +21,7 @@
 	}
 
 	const globalState = getContext<Writable<IStoreData>>('globalState');
+	const socket = getContext<Writable<Socket<any>>>('socket');
 
 	// (event): handle authenticating as alice or bob.
 	async function handleGetToken(username: string) {
@@ -34,19 +33,34 @@
 				body: JSON.stringify({ username: username })
 			});
 
+			// result
 			const result: IGetTokenResponseData = await response.json();
 
 			if (response.status === 200)
-				if (result.user) {
+				if (result.user && result.token) {
+					// set the user on global state and load data from client store
 					globalState.set({
 						...FAKE_DATA,
 						loading: false,
-						user: { ...result.user, status: 'Offline' }
+						user: { ...result.user, status: 'Offline', authToken: result.token }
 					});
+
+					// connect to the socket server after login
+					if ($socket) {
+						$socket.connect();
+					} else {
+						$socket = io('http://localhost:3000', {
+							extraHeaders: {
+								authorization: `bearer ${result.token}`
+							}
+						});
+					}
+
+					// redirect to chat
 					goto('/chat');
 				} else error(response.status, result.message ? result.message : '');
 		} catch (error) {
-			if (error instanceof TypeError) throw new Error('network error encountered', error);
+			if (error instanceof TypeError) console.error('network error encountered ', error);
 		}
 	}
 </script>

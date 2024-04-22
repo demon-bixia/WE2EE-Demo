@@ -28,8 +28,6 @@ import JWTMiddleware from '@src/middlewares/JWTMiddleware';
 // **** Variables **** //
 
 const app = express();
-const server = createServer(app);
-export const io = new Server(server);
 
 
 // **** Setup **** //
@@ -50,8 +48,10 @@ if (EnvVars.NodeEnv === NodeEnvs.Production.valueOf()) {
 }
 
 // CORS
-app.use(cors());
-
+app.use(cors({
+  origin: EnvVars.CORS.AllowOrigin,
+  optionsSuccessStatus: EnvVars.CORS.OptionsSuccessStatus
+}));
 
 // **** Routes **** //
 
@@ -76,10 +76,21 @@ app.use((
   return res.status(status).json({ error: err.message });
 });
 
+// create the http server and websocket server
+const server = createServer(app);
+export const io = new Server(server, {
+  cors: {
+    origin: EnvVars.CORS.AllowOrigin,
+    optionsSuccessStatus: EnvVars.CORS.OptionsSuccessStatus
+  },
+});
+
+
+
 // Share user context with socket.io server
 io.engine.use(JWTMiddleware.WSAuthenticateToken);
 
 
 // **** Export default **** //
 
-export default app;
+export default server;

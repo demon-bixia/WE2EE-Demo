@@ -18,8 +18,8 @@
 - [x] add verification modal.
 - [x] add session screen.
 - [x] add state and globalStore.
-- [x] add login logic
-- [] add socket communication
+- [x] add login logic.
+- [] add socket communication.
 
 
 ### library

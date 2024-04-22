@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { Writable } from 'svelte/store';
 	import type { IStoreData } from '../../types';
+	import type { Socket } from 'socket.io-client';
 
 	import Dropdown from '$lib/components/Dropdown.svelte';
 	import Modal from '$lib/components/Modal.svelte';
@@ -25,11 +26,13 @@
 	}
 
 	const globalState = getContext<Writable<IStoreData>>('globalState');
+	const socket = getContext<Writable<Socket<any>>>('socket');
 
 	// (event) handles logging out.
 	function handleLogout() {
 		globalState.set({ loading: false, logEntries: [], messages: [] });
 		goto('/login');
+		$socket.disconnect();
 	}
 </script>
 

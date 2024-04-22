@@ -1,3 +1,5 @@
+import type { Socket } from 'socket.io-client';
+
 export interface Session {
   _id: number;
 }
@@ -28,6 +30,7 @@ export interface IMessage {
 }
 
 export interface IStoreData {
+  socket?: Socket<any>,
   loading: boolean;
   user?: IUser;
   logEntries: ILogEntry[];

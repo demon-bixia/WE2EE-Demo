@@ -25,6 +25,7 @@ io.on("connection", async (defaultSocket: Socket) => {
 
   // log new connections
   logger.info(`new socket connection established by user: ${socket.data['username']} with socket #id: ${socket.id}`);
+  console.log("socket #id: " + socket.id + " connected");
 
   // check for message in queue and send them.
   const messages = await redisClient.json.get(`${socket.data['username']}:messages`);
