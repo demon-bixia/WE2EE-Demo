@@ -19,3 +19,4 @@ cache.connect();
 // Run server
 const SERVER_START_MSG = ('Express server started on port: ' + EnvVars.Port.toString());
 server.listen(EnvVars.Port, () => logger.info(SERVER_START_MSG));
+

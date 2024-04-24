@@ -38,6 +38,10 @@
 					authorization: `bearer ${$globalState.user.authToken}`
 				}
 			});
+
+			$socket.on('connect', () => {
+				console.log('connected to socket server');
+			});
 		}
 
 		// reconnect if the user is logged in and the connection is not active

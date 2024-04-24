@@ -6,7 +6,8 @@ interface ISessionIncomingMessage extends IncomingMessage {
 };
 
 export interface ISessionSocket extends Socket {
-  request: ISessionIncomingMessage
+  request: ISessionIncomingMessage,
+	data: any
 };
 
 export interface IMessage {
@@ -15,3 +16,4 @@ export interface IMessage {
   content: any,
   timestamp: string,
 };
+

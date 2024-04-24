@@ -19,8 +19,8 @@
 - [x] add session screen.
 - [x] add state and globalStore.
 - [x] add login logic.
-- [] add socket communication.
-
+- [x] add socket communication.
+- [] send and receive messages
 
 ### library
 
