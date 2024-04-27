@@ -4,9 +4,11 @@
 
 	import { goto } from '$app/navigation';
 	import { io } from 'socket.io-client';
-	import LoadingIndicator from '$lib/components/LoadingIndicator.svelte';
 	import { onMount, setContext } from 'svelte';
 	import { writable } from 'svelte/store';
+
+	import LoadingIndicator from '$lib/components/LoadingIndicator.svelte';
+	
 	import './layout.css';
 
 	export let data: IStoreData;
@@ -25,12 +27,9 @@
 
 	onMount(async () => {
 		// if user is not authenticated then redirect to /login
-		if (!$globalState.user && window.location.pathname !== '/login') {
-			await goto('/login');
-		} else if ($globalState.user && window.location.pathname !== '/chat') {
-			await goto('/chat');
-		}
-
+		if (!$globalState.user && window.location.pathname !== '/login')  await goto('/login');
+		else if ($globalState.user && window.location.pathname !== '/chat') await goto('/chat');
+		
 		// connect to socket server if user is logged-in
 		if ($globalState.user !== undefined) {
 			$socket = io('http://localhost:3000', {
@@ -38,9 +37,16 @@
 					authorization: `bearer ${$globalState.user.authToken}`
 				}
 			});
-
+			// ** Add event handlers ** //
+			// log the connection
 			$socket.on('connect', () => {
 				console.log('connected to socket server');
+			});
+			// when a message is received add it to the message array
+			$socket.on('message', ()=> {
+				if($globalState) {
+					$globalState = [...$globalState.messages, message];
+				}
 			});
 		}
 
@@ -52,7 +58,7 @@
 				}
 			}
 		});
-
+ 
 		// stop loading after a second of redirecting
 		setTimeout(() => {
 			$globalState.loading = false;

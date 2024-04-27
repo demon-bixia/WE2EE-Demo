@@ -1,6 +1,7 @@
 import type { IncomingMessage } from 'http';
 import type { Socket } from 'socket.io';
 
+
 interface ISessionIncomingMessage extends IncomingMessage {
   user: { username: string }
 };
@@ -11,9 +12,10 @@ export interface ISessionSocket extends Socket {
 };
 
 export interface IMessage {
-  receiver: string,
-  sender: string,
-  content: any,
-  timestamp: string,
-};
+	subject: string;
+  from: string;
+  to: string;
+  content: string;
+	timestamp: string;
+}
 

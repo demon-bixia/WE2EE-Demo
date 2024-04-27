@@ -110,7 +110,7 @@
 		padding: 1.5rem 0rem;
 		width: 100%;
 		border-top: 0.0625rem solid rgba(0, 0, 0, 0.1);
-		height: 86px;
+		height: 90px;
 		box-sizing: border-box;
 	}
 </style>

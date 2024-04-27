@@ -4,8 +4,10 @@ import type { IUser } from "@src/models/UserModel";
 
 import { redisClient } from "@src/connections/cache";
 import onMessage from "@src/handlers/onMessage";
+import onDisconnect from "@src/handlers/onDisconnect";
 
 import logger from "jet-logger";
+
 
 /**
  * Handles registering new sockets.
@@ -28,21 +30,19 @@ async function onConnection(defaultSocket: Socket) {
 
   // check for message in queue and send them.
   const messages = await redisClient.get(`${socket.data["username"]}:messages`);
-  if (messages) {
-    socket.emit("queuedMessages", (JSON.parse(messages) as {messages: IMessage[]}).messages);
+ 	const parsedMessages: {messages: IMessage[]} | null = JSON.parse(messages || '{}');
+	
+	if (parsedMessages &&  Array.isArray(parsedMessages.messages)) {
+	  await socket.emit("queuedMessages", parsedMessages.messages);
 		await redisClient.del(`${socket.data["username"]}:messages`);
 	}
 
   // ** Register Event Handlers ** //
 
-  socket.on("message", onMessage);
-
-  // (event) disconnected users
-  socket.on("disconnect", (reason: any) => {
-    logger.info(
-      "socket #id: " + socket.id + " disconnected with reason: " + reason,
-    );
-  });
+	// (event) receiving messages
+	socket.on("message", (message: IMessage) => onMessage(socket, message));
+	// (event) disconnected users
+  socket.on("disconnect", (reason: any) => onDisconnect(socket, reason));
 }
 
 // **** Export default **** //

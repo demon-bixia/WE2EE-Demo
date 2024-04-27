@@ -1,5 +1,6 @@
 import type { Socket } from 'socket.io-client';
 
+
 export interface Session {
   _id: number;
 }
@@ -24,9 +25,11 @@ export interface ILogEntry {
 }
 
 export interface IMessage {
+	subject: string;
   from: string;
   to: string;
   content: string;
+	timestamp: string;
 }
 
 export interface IStoreData {
@@ -36,3 +39,4 @@ export interface IStoreData {
   logEntries: ILogEntry[];
   messages: IMessage[];
 }
+

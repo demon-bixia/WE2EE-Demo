@@ -2,33 +2,7 @@ import type { IStoreData } from "./types";
 
 const FAKE_DATA: IStoreData = {
   loading: true,
-  messages: [
-    {
-      from: "Alice",
-      to: "Bob",
-      content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua",
-    },
-    {
-      from: "Bob",
-      to: "Alice",
-      content: "Lorem ipsum dolor sit amet",
-    },
-    {
-      from: "Alice",
-      to: "Bob",
-      content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit",
-    },
-    {
-      from: "Bob",
-      to: "Alice",
-      content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua",
-    },
-    {
-      from: "Alice",
-      to: "Bob",
-      content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod",
-    },
-  ],
+	messages: [],
   logEntries: [
     {
       date: '12:30',

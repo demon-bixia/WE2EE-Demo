@@ -13,6 +13,53 @@
 	import Alice from '../../assets/vectors/avatars/round/alice-round.svg';
 	import Bob from '../../assets/vectors/avatars/round/bob-round.svg';
 
+
+	const globalState = getContext<Writable<IStoreData>>('globalState');
+	const socket = getContext<Writable<Socket<any>>>('socket');
+
+	// (event) handles logging out.
+	function handleLogout() {
+		globalState.set({ loading: false, logEntries: [], messages: [] });
+		// redirect to login page
+		goto('/login');
+		// disconnect and remove listeners
+		$socket.disconnect();
+		$socket.off('message');
+		$socket.off('connect');
+	}
+
+	let textareaFocus = false;
+	// (event) when the textarea focuses make textareaFocus true
+	function handleDetectFocus() {
+		textareaFocus = true;
+	}
+	// (event) when the textarea loses focus make textareaFocus false
+	function handleDetectBlur() {
+		textareaFocus = false;
+	}
+
+	let textareaValue = "";
+	/*
+	 * (event) handles sending messages when the send button is click
+	 * if the textarea is don't send any messages
+	 */
+	async function handleSendMessage(event: MouseEvent | KeyboardEvent) {	
+		if(event instanceof KeyboardEvent && (!(event.key === 'Enter' && event.ctrlKey) || !textareaFocus)) return;	
+		if(textareaValue) {
+			event.preventDefault();
+			const currentDate = new Date();
+			const message = {
+				subject: "text-message",
+				from: $globalState.user.username,
+				to: $globalState.user.username === "Alice" ? "Bob" : "Alice",
+				content: textareaValue,
+				timestamp: currentDate.getTime(),
+			}
+			await $socket.emit("message", message);
+			textareaValue = "";
+		}
+	 }
+
 	let displayMenu = false;
 	// (event) open the chat dropdown menu
 	function handleToggleMenu() {
@@ -23,16 +70,6 @@
 	// (event) open the verification
 	function handleToggleVerificationModal() {
 		OpenVerificationModal = !OpenVerificationModal;
-	}
-
-	const globalState = getContext<Writable<IStoreData>>('globalState');
-	const socket = getContext<Writable<Socket<any>>>('socket');
-
-	// (event) handles logging out.
-	function handleLogout() {
-		globalState.set({ loading: false, logEntries: [], messages: [] });
-		goto('/login');
-		$socket.disconnect();
 	}
 </script>
 
@@ -87,12 +124,15 @@
 		</div>
 		<!--bottom section of chat-->
 		<div class="bottom">
-			<input
+			<textarea
+			  bind:value={textareaValue}
+				on:focus={handleDetectFocus}
+				on:blur={handleDetectBlur}
 				class="message-input"
 				type="text"
 				placeholder="Type the messages you want to send here...."
 			/>
-			<button class="send-button">
+			<button on:click={handleSendMessage} class="send-button">
 				Send
 				<Icon style="color:#ffffff;" src={PaperAirplane} solid size="24" />
 			</button>
@@ -113,6 +153,7 @@
 		</Modal>
 	</section>
 {/if}
+<svelte:window on:keydown={handleSendMessage} />
 
 <style>
 	.chat {
@@ -189,6 +230,7 @@
 		gap: 2rem;
 		justify-content: space-between;
 		padding: 1rem 1.5rem;
+		max-height: 86px;
 		border-top: 0.0625rem solid rgba(0, 0, 0, 0.1);
 	}
 
@@ -199,6 +241,9 @@
 		padding: 1rem;
 		background: var(--light-gray);
 		font-size: 1rem;
+		resize: none;
+		max-height:55px;
+		box-sizing: border-box;
 	}
 
 	.chat .bottom .message-input:focus {
@@ -215,6 +260,7 @@
 		background: var(--blue);
 		font-size: 1rem;
 		transition: all 200ms ease;
+
 	}
 
 	.chat .bottom .send-button:hover {

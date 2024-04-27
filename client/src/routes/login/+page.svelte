@@ -42,7 +42,6 @@
 			const result: IGetTokenResponseData = await response.json();
 
 			if (response.status === 200){
-
 				if (result.user && result.token) {
 					// set the user on global state and load data from client store
 					globalState.set({
@@ -50,21 +49,24 @@
 						loading: false,
 						user: { ...result.user, status: 'Offline', authToken: result.token }
 					});
-
 					// connect to the socket server after login
-					if ($socket) {
-						$socket.connect();
-						$socket.on('connect', ()=>{
-							console.log('sucessfuly connected to socket server');
-						});
-					} else {
-						$socket = io('http://localhost:3000', {
-							extraHeaders: {
-								authorization: `bearer ${result.token}`
-							}
-						});
-					}
-				}
+					$socket = io('http://localhost:3000', {
+						extraHeaders: {
+							authorization: `bearer ${result.token}`
+						}
+					});		
+					// ** Add event handlers ** //
+					// log the connection
+					$socket.on('connect', () => {
+						console.log('connected to socket server');
+					});
+					// when a message is received add it to the message array
+					$socket.on('message', (message: IMessage)=> {
+						if($globalState) {
+							$globalState.messages = [...$globalState.messages, message]; 
+						}
+					});
+			}
 				// redirect to chat
 				goto('/chat');
 			} else {
