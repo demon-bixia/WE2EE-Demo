@@ -31,9 +31,8 @@ async function onConnection(defaultSocket: Socket) {
   // check for message in queue and send them.
   const messages = await redisClient.get(`${socket.data["username"]}:messages`);
  	const parsedMessages: {messages: IMessage[]} | null = JSON.parse(messages || '{}');
-	
 	if (parsedMessages &&  Array.isArray(parsedMessages.messages)) {
-	  await socket.emit("queuedMessages", parsedMessages.messages);
+	  await socket.emit("queued-messages", parsedMessages.messages);
 		await redisClient.del(`${socket.data["username"]}:messages`);
 	}
 
@@ -44,6 +43,7 @@ async function onConnection(defaultSocket: Socket) {
 	// (event) disconnected users
   socket.on("disconnect", (reason: any) => onDisconnect(socket, reason));
 }
+
 
 // **** Export default **** //
 

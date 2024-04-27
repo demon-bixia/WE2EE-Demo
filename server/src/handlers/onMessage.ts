@@ -34,12 +34,10 @@ async function onMessage(socket: ISessionSocket, msg: IMessage) {
   }
 
   // emit message back to sender
-  const senderSocket = sockets.find((socket) => (socket.data["username"] === msg["from"]));
-	if (senderSocket) {
-		senderSocket.emit("message", msg);
-	}
+	socket.emit("message", msg);
 }
 
 // **** Export default **** //
 
 export default onMessage;
+

@@ -5,7 +5,7 @@
 
 	import type { Socket } from 'socket.io-client';
 	import type { Writable } from 'svelte/store';
-	import type { IStoreData, IUser } from '../../types';
+	import type { IStoreData, IUser, IGetTokenResponseData } from '../../types';
 
 	import Alice from '../../assets/vectors/avatars/regular/alice.svg';
 	import Bob from '../../assets/vectors/avatars/regular/bob.svg';
@@ -17,12 +17,6 @@
 	import { ArrowLongRight, Icon } from 'svelte-hero-icons';
 
 	import FAKE_DATA from '../../fake-data';
-
-	interface IGetTokenResponseData {
-		user?: IUser;
-		message?: string;
-		token?: string;
-	}
 
 	const globalState = getContext<Writable<IStoreData>>('globalState');
 	const socket = getContext<Writable<Socket<any>>>('socket');
@@ -38,9 +32,10 @@
 				body: JSON.stringify({ username: username })
 			});
 
-			// result
+			// parse result
 			const result: IGetTokenResponseData = await response.json();
-
+			
+			// handle response
 			if (response.status === 200){
 				if (result.user && result.token) {
 					// set the user on global state and load data from client store
@@ -48,23 +43,6 @@
 						...FAKE_DATA,
 						loading: false,
 						user: { ...result.user, status: 'Offline', authToken: result.token }
-					});
-					// connect to the socket server after login
-					$socket = io('http://localhost:3000', {
-						extraHeaders: {
-							authorization: `bearer ${result.token}`
-						}
-					});		
-					// ** Add event handlers ** //
-					// log the connection
-					$socket.on('connect', () => {
-						console.log('connected to socket server');
-					});
-					// when a message is received add it to the message array
-					$socket.on('message', (message: IMessage)=> {
-						if($globalState) {
-							$globalState.messages = [...$globalState.messages, message]; 
-						}
 					});
 			}
 				// redirect to chat

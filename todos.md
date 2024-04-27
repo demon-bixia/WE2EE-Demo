@@ -20,7 +20,7 @@
 - [x] add state and globalStore.
 - [x] add login logic.
 - [x] add socket communication.
-- [] send and receive messages
+- [x] send and receive messages
 
 ### library
 

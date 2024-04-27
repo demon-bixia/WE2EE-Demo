@@ -40,3 +40,9 @@ export interface IStoreData {
   messages: IMessage[];
 }
 
+export interface IGetTokenResponseData {
+	user?: IUser;
+	message?: string;
+	token?: string;
+}
+

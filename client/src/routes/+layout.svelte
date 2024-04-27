@@ -8,8 +8,10 @@
 	import { writable } from 'svelte/store';
 
 	import LoadingIndicator from '$lib/components/LoadingIndicator.svelte';
-	
+	import SocketServer from '$lib/components/SocketServer.svelte';
+
 	import './layout.css';
+
 
 	export let data: IStoreData;
 
@@ -18,47 +20,13 @@
 		logEntries: [],
 		messages: []
 	});
-	$: globalState.set(data);
-
 	setContext('globalState', globalState);
-
-	const socket = writable<Socket<any>>(undefined);
-	setContext('socket', socket);
+	globalState.set(data);
 
 	onMount(async () => {
 		// if user is not authenticated then redirect to /login
 		if (!$globalState.user && window.location.pathname !== '/login')  await goto('/login');
 		else if ($globalState.user && window.location.pathname !== '/chat') await goto('/chat');
-		
-		// connect to socket server if user is logged-in
-		if ($globalState.user !== undefined) {
-			$socket = io('http://localhost:3000', {
-				extraHeaders: {
-					authorization: `bearer ${$globalState.user.authToken}`
-				}
-			});
-			// ** Add event handlers ** //
-			// log the connection
-			$socket.on('connect', () => {
-				console.log('connected to socket server');
-			});
-			// when a message is received add it to the message array
-			$socket.on('message', ()=> {
-				if($globalState) {
-					$globalState = [...$globalState.messages, message];
-				}
-			});
-		}
-
-		// reconnect if the user is logged in and the connection is not active
-		socket.subscribe((value) => {
-			if ($globalState.user) {
-				if ($socket && !$socket.active) {
-					$socket.connect();
-				}
-			}
-		});
- 
 		// stop loading after a second of redirecting
 		setTimeout(() => {
 			$globalState.loading = false;
@@ -72,13 +40,15 @@
 </svelte:head>
 
 <main>
-	{#if !$globalState.loading}
-		<slot></slot>
-	{:else}
-		<div class="page-loading-container">
-			<LoadingIndicator />
-		</div>
-	{/if}
+	<SocketServer>
+		{#if !$globalState.loading}
+			<slot></slot>
+		{:else}
+			<div class="page-loading-container">
+				<LoadingIndicator />
+			</div>
+		{/if}
+	</SocketServer>
 </main>
 
 <style>

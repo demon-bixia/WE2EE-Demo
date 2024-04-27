@@ -16,6 +16,7 @@
 
 	const globalState = getContext<Writable<IStoreData>>('globalState');
 	const socket = getContext<Writable<Socket<any>>>('socket');
+	const disconnect = getContext<() => void>('disconnect');
 
 	// (event) handles logging out.
 	function handleLogout() {
@@ -23,9 +24,7 @@
 		// redirect to login page
 		goto('/login');
 		// disconnect and remove listeners
-		$socket.disconnect();
-		$socket.off('message');
-		$socket.off('connect');
+		disconnect();
 	}
 
 	let textareaFocus = false;
@@ -80,11 +79,11 @@
 			<div class="contact-info">
 				<img
 					class="avatar"
-					src={$globalState.user.username === 'Alice' ? Alice : Bob}
+					src={$globalState.user.username === 'Alice' ? Bob : Alice}
 					alt="contact avatar"
 				/>
 				<div>
-					<p class="body-1 name">{$globalState.user.username}</p>
+					<p class="body-1 name">{$globalState.user.username === 'Alice' ? 'Bob': 'Alice'}</p>
 					<p class="body-1 status" class:online={$globalState.user.status === 'Online'}>
 						{$globalState.user.status}
 					</p>
