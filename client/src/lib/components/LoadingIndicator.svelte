@@ -13,17 +13,17 @@
 	.lds-ring {
 		display: inline-block;
 		position: relative;
-		width: 80px;
-		height: 80px;
+		width: 5rem;
+		height: 5rem;
 	}
 	.lds-ring div {
 		box-sizing: border-box;
 		display: block;
 		position: absolute;
-		width: 64px;
-		height: 64px;
-		margin: 8px;
-		border: 5px solid var(--blue);
+		width: 4rem;
+		height: 4rem;
+		margin: 0.5rem;
+		border: 0.3125rem solid var(--blue);
 		border-radius: 50%;
 		animation: lds-ring 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
 		border-color: var(--blue) transparent transparent transparent;

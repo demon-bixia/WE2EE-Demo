@@ -35,7 +35,8 @@ export interface IMessage {
 export interface IStoreData {
   socket?: Socket<any>,
   loading: boolean;
-  user?: IUser;
+  protocolLog: boolean;
+	user?: IUser;
   logEntries: ILogEntry[];
   messages: IMessage[];
 }

@@ -8,6 +8,11 @@
 	import { Icon, MagnifyingGlass } from 'svelte-hero-icons';
 
 	const globalState = getContext<Writable<IStoreData>>('globalState');
+
+	// (event) close the protocol log
+	function handleCloseProtocolLog() {
+		$globalState.protocolLog = false;
+	}
 </script>
 
 <div class="page-container">
@@ -15,7 +20,11 @@
 	<slot></slot>
 
 	<!--sidebar-->
-	<aside class="sidebar">
+	<aside
+		class="sidebar"
+		class:open={$globalState.protocolLog}
+		class:close={!$globalState.protocolLog}
+	>
 		<search class="search-container">
 			<div class="search-input-wrapper">
 				<input class="search-input" type="text" placeholder="Search" />
@@ -23,6 +32,7 @@
 					<Icon style="color:rgba(0, 0, 0, 0.4);" src={MagnifyingGlass} solid size="24" />
 				</span>
 			</div>
+			<button on:click={handleCloseProtocolLog} class="close-button"> Close </button>
 		</search>
 
 		<div class="protocol-log">
@@ -54,8 +64,8 @@
 	}
 
 	.sidebar {
-		flex-basis: 35%;
 		height: 100%;
+		background: #ffffff;
 		display: flex;
 		flex-direction: column;
 	}
@@ -66,7 +76,7 @@
 		display: flex;
 		justify-content: center;
 		align-items: center;
-		height: 5.5rem;
+		height: 5.5125rem;
 		box-sizing: border-box;
 	}
 
@@ -78,7 +88,7 @@
 	.sidebar .search-container .search-input-wrapper .search-input {
 		box-sizing: border-box;
 		width: 100%;
-		border: 1px solid rgba(0, 0, 0, 0.1);
+		border: 0.0625rem solid rgba(0, 0, 0, 0.1);
 		border-radius: 1rem;
 		padding: 1rem;
 		background: var(--light-gray);
@@ -93,6 +103,33 @@
 		position: absolute;
 		right: 1rem;
 		top: 23%;
+	}
+
+	.sidebar .search-container .close-button {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		font-size: 1rem;
+		color: rgba(0, 0, 0, 0.6);
+		padding: 1rem;
+		border-radius: 1rem;
+		text-decoration: none;
+		border: 0.0625rem solid rgba(0, 0, 0, 0.1);
+		transition: all 200ms ease;
+		margin-left: 1rem;
+		display: none;
+	}
+
+	.sidebar .search-container .close-button:hover {
+		border: 0.0625rem solid var(--light-red);
+		color: var(--red);
+	}
+
+	.sidebar .search-container .close-button:focus {
+		box-shadow: 0 0 0.0625rem 0.1875rem var(--light-red);
+		border: 0.0625rem solid var(--light-red);
+		color: var(--red);
+		outline: none;
 	}
 
 	.sidebar .protocol-log {
@@ -110,7 +147,34 @@
 		padding: 1.5rem 0rem;
 		width: 100%;
 		border-top: 0.0625rem solid rgba(0, 0, 0, 0.1);
-		height: 90px;
+		height: 5.5rem;
 		box-sizing: border-box;
+	}
+
+	/**** Tablet Screens ****/
+	@media only screen and (width < 56.25rem) {
+		.sidebar {
+			position: absolute;
+			z-index: 1000;
+			right: 0;
+			height: 100%;
+			overflow: hidden;
+		}
+
+		.sidebar.close {
+			width: 0;
+		}
+
+		.sidebar.open {
+			width: 100%;
+		}
+
+		.sidebar .search-container .close-button {
+			display: block;
+		}
+	}
+
+	/**** Mobile Screens ****/
+	@media only screen and (width < 37.5rem) {
 	}
 </style>

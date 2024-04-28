@@ -3,7 +3,8 @@ import type { IStoreData } from "./types";
 const FAKE_DATA: IStoreData = {
   loading: true,
 	messages: [],
-  logEntries: [
+	protocolLog: false,
+	logEntries: [
     {
       date: '12:30',
       title: 'Received Key bundle from server.',

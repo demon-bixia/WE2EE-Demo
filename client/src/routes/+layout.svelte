@@ -1,9 +1,7 @@
 <script lang="ts">
 	import type { IStoreData } from '../types';
-	import type { Socket } from 'socket.io-client';
 
 	import { goto } from '$app/navigation';
-	import { io } from 'socket.io-client';
 	import { onMount, setContext } from 'svelte';
 	import { writable } from 'svelte/store';
 
@@ -12,11 +10,11 @@
 
 	import './layout.css';
 
-
 	export let data: IStoreData;
 
 	const globalState = writable<IStoreData>({
 		loading: true,
+		protocolLog: true,
 		logEntries: [],
 		messages: []
 	});
@@ -25,7 +23,7 @@
 
 	onMount(async () => {
 		// if user is not authenticated then redirect to /login
-		if (!$globalState.user && window.location.pathname !== '/login')  await goto('/login');
+		if (!$globalState.user && window.location.pathname !== '/login') await goto('/login');
 		else if ($globalState.user && window.location.pathname !== '/chat') await goto('/chat');
 		// stop loading after a second of redirecting
 		setTimeout(() => {

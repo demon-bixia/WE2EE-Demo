@@ -2,6 +2,7 @@
 
 - The thesis should be about a model for end to end encryption on the web.
 
+
 ### server
 
 - [x] login - alice or bob
@@ -21,6 +22,8 @@
 - [x] add login logic.
 - [x] add socket communication.
 - [x] send and receive messages
+- [] make responsive.
+
 
 ### library
 
@@ -38,3 +41,4 @@
 ### session sync
 
 - [] implement Sync.
+

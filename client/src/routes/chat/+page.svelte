@@ -13,14 +13,13 @@
 	import Alice from '../../assets/vectors/avatars/round/alice-round.svg';
 	import Bob from '../../assets/vectors/avatars/round/bob-round.svg';
 
-
 	const globalState = getContext<Writable<IStoreData>>('globalState');
 	const socket = getContext<Writable<Socket<any>>>('socket');
 	const disconnect = getContext<() => void>('disconnect');
 
 	// (event) handles logging out.
 	function handleLogout() {
-		globalState.set({ loading: false, logEntries: [], messages: [] });
+		globalState.set({ loading: false, protocolLog: false, logEntries: [], messages: [] });
 		// redirect to login page
 		goto('/login');
 		// disconnect and remove listeners
@@ -37,27 +36,31 @@
 		textareaFocus = false;
 	}
 
-	let textareaValue = "";
+	let textareaValue = '';
 	/*
 	 * (event) handles sending messages when the send button is click
 	 * if the textarea is don't send any messages
 	 */
-	async function handleSendMessage(event: MouseEvent | KeyboardEvent) {	
-		if(event instanceof KeyboardEvent && (!(event.key === 'Enter' && event.ctrlKey) || !textareaFocus)) return;	
-		if(textareaValue) {
+	async function handleSendMessage(event: MouseEvent | KeyboardEvent) {
+		if (
+			event instanceof KeyboardEvent &&
+			(!(event.key === 'Enter' && event.ctrlKey) || !textareaFocus)
+		)
+			return;
+		if (textareaValue && $globalState.user) {
 			event.preventDefault();
 			const currentDate = new Date();
 			const message = {
-				subject: "text-message",
+				subject: 'text-message',
 				from: $globalState.user.username,
-				to: $globalState.user.username === "Alice" ? "Bob" : "Alice",
+				to: $globalState.user.username === 'Alice' ? 'Bob' : 'Alice',
 				content: textareaValue,
-				timestamp: currentDate.getTime(),
-			}
-			await $socket.emit("message", message);
-			textareaValue = "";
+				timestamp: currentDate.getTime()
+			};
+			await $socket.emit('message', message);
+			textareaValue = '';
 		}
-	 }
+	}
 
 	let displayMenu = false;
 	// (event) open the chat dropdown menu
@@ -69,6 +72,11 @@
 	// (event) open the verification
 	function handleToggleVerificationModal() {
 		OpenVerificationModal = !OpenVerificationModal;
+	}
+
+	// (event) opens the protocol log
+	function handleOpenProtocolLog() {
+		$globalState.protocolLog = true;
 	}
 </script>
 
@@ -83,7 +91,7 @@
 					alt="contact avatar"
 				/>
 				<div>
-					<p class="body-1 name">{$globalState.user.username === 'Alice' ? 'Bob': 'Alice'}</p>
+					<p class="body-1 name">{$globalState.user.username === 'Alice' ? 'Bob' : 'Alice'}</p>
 					<p class="body-1 status" class:online={$globalState.user.status === 'Online'}>
 						{$globalState.user.status}
 					</p>
@@ -99,11 +107,20 @@
 						<button
 							on:click={handleToggleMenu}
 							on:click={handleToggleVerificationModal}
-							class="menu-item">ID Verification</button
+							class="menu-item"
 						>
-						<button on:click={handleToggleMenu} on:click={handleLogout} class="menu-item"
-							>Logout</button
+							ID Verification
+						</button>
+						<button on:click={handleToggleMenu} on:click={handleLogout} class="menu-item">
+							Logout</button
 						>
+						<button
+							on:click={handleToggleMenu}
+							on:click={handleOpenProtocolLog}
+							class="menu-item protocol-button"
+						>
+							Protocol Log
+						</button>
 					</Dropdown>
 				{/if}
 			</div>
@@ -124,12 +141,11 @@
 		<!--bottom section of chat-->
 		<div class="bottom">
 			<textarea
-			  bind:value={textareaValue}
+				bind:value={textareaValue}
 				on:focus={handleDetectFocus}
 				on:blur={handleDetectBlur}
 				class="message-input"
-				type="text"
-				placeholder="Type the messages you want to send here...."
+				placeholder="Message..."
 			/>
 			<button on:click={handleSendMessage} class="send-button">
 				Send
@@ -159,7 +175,7 @@
 		display: flex;
 		flex-direction: column;
 		border-right: 0.0625rem solid rgba(0, 0, 0, 0.1);
-		flex-basis: 65%;
+		flex: 1;
 	}
 
 	.chat .top {
@@ -202,12 +218,16 @@
 		height: 2.8125rem;
 	}
 
+	.chat .top .dropdown-menu-wrapper .dropdown-menu .menu-item.protocol-button {
+		display: none;
+	}
+
 	.chat .middle {
 		flex: 1;
 		display: flex;
 		flex-direction: column;
 		padding: 1.5rem;
-		overflow-y: scroll;
+		overflow-y: auto;
 		gap: 1.5rem;
 	}
 
@@ -229,7 +249,6 @@
 		gap: 2rem;
 		justify-content: space-between;
 		padding: 1rem 1.5rem;
-		max-height: 86px;
 		border-top: 0.0625rem solid rgba(0, 0, 0, 0.1);
 	}
 
@@ -241,7 +260,7 @@
 		background: var(--light-gray);
 		font-size: 1rem;
 		resize: none;
-		max-height:55px;
+		max-height: 3.4375rem;
 		box-sizing: border-box;
 	}
 
@@ -259,7 +278,6 @@
 		background: var(--blue);
 		font-size: 1rem;
 		transition: all 200ms ease;
-
 	}
 
 	.chat .bottom .send-button:hover {
@@ -325,5 +343,23 @@
 		border: 0.0625rem solid var(--light-red);
 		color: var(--red);
 		outline: none;
+	}
+
+	/**** Tablet Screens ****/
+	@media only screen and (width < 56.25rem) {
+		.chat .top .dropdown-menu-wrapper .dropdown-menu .menu-item.protocol-button {
+			display: block;
+		}
+
+		.chat .bottom .message-input {
+			height: fit-content;
+		}
+	}
+
+	/**** Mobile Screens ****/
+	@media only screen and (width < 37.5rem) {
+		.chat .bottom .message-input {
+			height: fit-content;
+		}
 	}
 </style>

@@ -23,18 +23,18 @@
 		flex-direction: column;
 		justify-content: center;
 		background-color: #ffffff;
-		padding: 12px 0;
-		border-radius: 8px;
+		padding: 0.75rem 0;
+		border-radius: 0.5rem;
 		box-shadow: 0 0.3125rem 1rem rgba(0, 0, 0, 0.1);
-		width: 160px;
+		width: 10rem;
 	}
 
 	:global(.dropdown-menu .menu-item) {
 		text-decoration: none;
 		justify-content: start;
 		text-align: start;
-		padding: 6px 16px;
-		font-size: 16px;
+		padding: 0.375rem 1rem;
+		font-size: 1rem;
 		font-weight: 400;
 		line-height: 160%;
 		color: rgba(0, 0, 0, 0.6);

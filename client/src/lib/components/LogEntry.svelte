@@ -82,7 +82,7 @@
 	}
 
 	:global(.entry-container:not(:last-child)) {
-		padding-bottom: 48px;
+		padding-bottom: 3rem;
 	}
 
 	:global(.entry-container:last-child .connector) {
@@ -96,7 +96,7 @@
 	.basic-info {
 		flex: 1;
 		display: flex;
-		gap: 12px;
+		gap: 0.75rem;
 	}
 
 	.date {
@@ -106,27 +106,27 @@
 
 	.circle-container {
 		flex-basis: 5%;
-		min-width: 16px;
-		max-width: 16px;
+		min-width: 1rem;
+		max-width: 1rem;
 		display: flex;
 	}
 
 	.circle {
 		flex-basis: 5%;
-		min-width: 16px;
-		max-width: 16px;
-		height: 16px;
-		border: 1px solid rgba(0, 0, 0, 0.4);
+		min-width: 1rem;
+		max-width: 1rem;
+		height: 1rem;
+		border: 0.0625rem solid rgba(0, 0, 0, 0.4);
 		border-radius: 100%;
 		box-sizing: border-box;
 	}
 
 	.connector {
 		position: absolute;
-		height: calc(100% - 16px);
-		width: 1px;
-		top: 16px;
-		left: 61.5px;
+		height: calc(100% - 1rem);
+		width: 0.0625rem;
+		top: 1rem;
+		left: 3.8438rem;
 		background-color: rgba(0, 0, 0, 0.2);
 	}
 
@@ -134,7 +134,7 @@
 		min-width: 10%;
 		flex-basis: 75%;
 		line-height: normal;
-		min-width: 1px;
+		min-width: 0.0625rem;
 		flex: 1;
 	}
 
@@ -142,11 +142,11 @@
 		flex-basis: 10%;
 		display: flex;
 		align-items: center;
-		gap: 5px;
-		font-size: 16px;
+		gap: 0.3125rem;
+		font-size: 1rem;
 		color: var(--blue);
 		height: min-content;
-		border-radius: 4px;
+		border-radius: 0.25rem;
 		line-height: normal;
 	}
 
@@ -161,15 +161,15 @@
 
 	.more-details {
 		display: flex;
-		gap: 12px;
+		gap: 0.75rem;
 	}
 
 	.detail-container {
 		flex-basis: 85%;
 		display: flex;
 		flex-direction: column;
-		padding-top: 16px;
-		gap: 4px;
+		padding-top: 1rem;
+		gap: 0.25rem;
 	}
 
 	.detail {
@@ -183,9 +183,9 @@
 
 	.empty-space-circle {
 		flex-basis: 5%;
-		min-width: 16px;
-		max-width: 16px;
-		width: 16px;
+		min-width: 1rem;
+		max-width: 1rem;
+		width: 1rem;
 	}
 
 	.detail .key {
@@ -196,14 +196,14 @@
 		display: flex;
 		justify-content: center;
 		align-items: center;
-		padding: 0 5px;
-		gap: 5px;
-		font-size: 16px;
+		padding: 0 0.3125rem;
+		gap: 0.3125rem;
+		font-size: 1rem;
 		color: rgba(0, 0, 0, 0.6);
 		height: min-content;
-		border-radius: 4px;
+		border-radius: 0.25rem;
 		transition: all 100ms ease;
-		width: 70px;
+		width: 4.375rem;
 	}
 
 	.copy-button:hover {
@@ -213,5 +213,42 @@
 	.copy-button:focus {
 		outline: none;
 		background: var(--light-gray);
+	}
+
+	/**** Tablet Screens ****/
+	@media only screen and (width < 56.25rem) {
+		.date {
+			flex-basis: 5%;
+		}
+
+		.empty-space-date {
+			flex-basis: 5%;
+		}
+
+		.detail-container {
+			flex-basis: 40%;
+		}
+
+		.detail {
+		}
+	}
+
+	/**** Mobile Screens ****/
+	@media only screen and (width < 37.5rem) {
+		.date {
+			flex-basis: 15%;
+		}
+
+		.empty-space-date {
+			flex-basis: 15%;
+		}
+
+		.detail-container {
+			flex-basis: 90%;
+		}
+
+		.detail .value {
+			display: none;
+		}
 	}
 </style>

@@ -12,20 +12,20 @@
 
 	<div class="sessions">
 		<div class="session">
-			<p class="session-id">Session ID: 02948758290</p>
+			<p class="session-id">ID: 02948758290</p>
 			<div class="controls">
 				<p class="main-session-indicator body-1">Main</p>
 				<button class="remove-button"> Remove </button>
 			</div>
 		</div>
 		<div class="session">
-			<p class="session-id">Session ID: 02948758290</p>
+			<p class="session-id">ID: 02948758290</p>
 			<div class="controls">
 				<button class="remove-button"> Remove </button>
 			</div>
 		</div>
 		<div class="session">
-			<p class="session-id">Session ID: 02948758290</p>
+			<p class="session-id">ID: 02948758290</p>
 			<div class="controls">
 				<p class="request-session-indicator body-1">Request</p>
 				<button class="icon-button">
@@ -42,7 +42,7 @@
 
 <style>
 	.sessions-container {
-		flex-basis: 65%;
+		flex: 1;
 		display: flex;
 		flex-direction: column;
 		align-items: center;
@@ -63,7 +63,6 @@
 		justify-content: center;
 		align-items: center;
 		gap: 1rem;
-		overflow-y: scroll;
 		overflow-x: hidden;
 	}
 
@@ -153,5 +152,30 @@
 		border: 0.0625rem solid var(--light-red);
 		color: var(--red);
 		outline: none;
+	}
+
+	/**** Tablet Screens ****/
+	@media only screen and (width < 56.25rem) {
+	}
+
+	/**** Mobile Screens ****/
+	@media only screen and (width < 37.5rem) {
+		.sessions-container {
+			padding: 1.5rem;
+		}
+
+		.page-header {
+			width: 100%;
+		}
+
+		.sessions {
+			width: 100%;
+		}
+
+		.sessions .session {
+			gap: 0;
+			width: 100%;
+			justify-content: space-between;
+		}
 	}
 </style>

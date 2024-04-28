@@ -1,17 +1,14 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { io } from 'socket.io-client';
 	import { getContext } from 'svelte';
-
 	import type { Socket } from 'socket.io-client';
 	import type { Writable } from 'svelte/store';
-	import type { IStoreData, IUser, IGetTokenResponseData } from '../../types';
+	import type { IStoreData, IGetTokenResponseData } from '../../types';
 
 	import Alice from '../../assets/vectors/avatars/regular/alice.svg';
 	import Bob from '../../assets/vectors/avatars/regular/bob.svg';
 	import Circle from '../../assets/vectors/doodles/circle.svg';
 	import Grid from '../../assets/vectors/doodles/grid.svg';
-	import XPattern from '../../assets/vectors/doodles/x-pattern.svg';
 	import Triangle from '../../assets/vectors/doodles/triangle.svg';
 
 	import { ArrowLongRight, Icon } from 'svelte-hero-icons';
@@ -34,9 +31,9 @@
 
 			// parse result
 			const result: IGetTokenResponseData = await response.json();
-			
+
 			// handle response
-			if (response.status === 200){
+			if (response.status === 200) {
 				if (result.user && result.token) {
 					// set the user on global state and load data from client store
 					globalState.set({
@@ -44,11 +41,11 @@
 						loading: false,
 						user: { ...result.user, status: 'Offline', authToken: result.token }
 					});
-			}
+				}
 				// redirect to chat
 				goto('/chat');
 			} else {
-					console.error(response.status, result.message ? result.message : '');
+				console.error(response.status, result.message ? result.message : '');
 			}
 		} catch (error) {
 			if (error instanceof TypeError) console.error('network error encountered ', error);
@@ -58,7 +55,6 @@
 </script>
 
 <section class="page-container">
-	<img class="x-pattern" src={XPattern} alt="x pattern" />
 	<img class="shape circle-left" src={Circle} alt="circle shape" />
 	<img class="shape circle-right" src={Circle} alt="circle shape" />
 	<img class="shape triangle-left" src={Triangle} alt="triangle shape" />
@@ -115,18 +111,12 @@
 
 <style>
 	.page-container {
+		background: url('../../assets/vectors/doodles/x-pattern.svg');
 		display: flex;
 		flex-direction: column;
 		align-items: center;
 		justify-content: space-between;
 		height: 100vh;
-	}
-
-	.x-pattern {
-		position: absolute;
-		width: 100%;
-		height: 100%;
-		z-index: -1;
 	}
 
 	.shape {
@@ -176,9 +166,6 @@
 		display: flex;
 		justify-content: center;
 		align-items: center;
-	}
-
-	.login-container {
 		gap: 9.375rem;
 	}
 
@@ -227,5 +214,101 @@
 		padding: 1.5rem 0rem;
 		width: 100%;
 		border-top: 0.0625rem solid rgba(0, 0, 0, 0.1);
+	}
+
+	/**** Tablet Screens ****/
+	@media only screen and (width < 56.25rem) {
+		.shape.circle-left {
+			left: 0;
+			top: 73%;
+		}
+
+		.shape.circle-right {
+			left: 75%;
+			top: 15%;
+		}
+
+		.shape.triangle-left {
+			left: 10%;
+			top: 10%;
+		}
+
+		.shape.triangle-right {
+			left: 83.5%;
+			top: 47%;
+		}
+	}
+
+	/**** Mobile Screens ****/
+	@media only screen and (width < 37.5rem) {
+		.page-container {
+			padding: 1rem;
+			box-sizing: border-box;
+		}
+
+		.page-header {
+			width: 100%;
+		}
+
+		.login-container {
+			flex-direction: column;
+			gap: 1.5rem;
+			width: 100%;
+		}
+
+		.login-container .grid-pattern-wrapper {
+			width: 100%;
+		}
+
+		.account {
+			flex-direction: row;
+			justify-content: start;
+			align-items: center;
+			padding: 1.75rem 1.5rem;
+			width: 100%;
+		}
+
+		.account .avatar,
+		.account .name {
+			margin-bottom: 0;
+		}
+
+		.account .avatar {
+			width: 3.125rem;
+			margin-right: 1.5rem;
+		}
+
+		.account .name {
+			margin-right: auto;
+		}
+
+		.grid-pattern-1 {
+			top: 55%;
+			right: 15%;
+		}
+
+		.grid-pattern-2 {
+			display: none;
+		}
+
+		.shape.circle-left {
+			left: 0;
+			top: 78%;
+		}
+
+		.shape.circle-right {
+			left: 50%;
+			top: 35%;
+		}
+
+		.shape.triangle-left {
+			left: 0;
+			top: 25%;
+		}
+
+		.shape.triangle-right {
+			left: 60%;
+			top: 70%;
+		}
 	}
 </style>
