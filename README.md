@@ -52,7 +52,6 @@ visit https://localhost:5173, your browser will show a warning just ignore it a 
 
 - The thesis should be about a model for end to end encryption on the web.
 
-
 ### server
 
 - [x] login - alice or bob
@@ -73,22 +72,21 @@ visit https://localhost:5173, your browser will show a warning just ignore it a 
 - [x] add socket communication.
 - [x] send and receive messages
 - [x] make responsive.
+- [x] add error page.
+- [x] add a please allow indexedDB dialog.
+- [x] add client storage (local storage).
+- [x] integrate the protocol
+- [] log protocol information.
 
 
 ### library
 
-- [] implement X3DH.
-- [] implement AES message encryption.
-- [] implement EcDSA signing.
-- [] implement identity verification.
-- [] implement secure key store.
-
-### client storage
-
-- [] add client storage.
-
-
-### session sync
-
-- [] implement Sync.
+- [x] implement X3DH.
+- [x] implement AES message encryption.
+- [x] implement EcDSA signing.
+- [x] implement identity verification.
+- [x] implement secure key store.
+- [x] implement sync.
+- [x] add old keys management.
+- [x] key deletion
 
