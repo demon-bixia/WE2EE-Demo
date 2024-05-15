@@ -16,6 +16,8 @@
 
 	const globalState = getContext<Writable<IStoreData>>('globalState');
 
+	const log = getContext<Writable<(logEntry: any) => void>>('log');
+
 	const socket = writable<Socket<any> | undefined>(undefined);
 	setContext('socket', socket);
 
@@ -41,6 +43,8 @@
 						$globalState.user.authToken,
 						$globalState.user.username
 					);
+					// Log Connection
+					$log({ title: 'Connected to socket server' });
 					// Setup keys.
 					await setupAndUpdateKeys();
 				}
@@ -69,6 +73,10 @@
 			$socket.off('connect');
 			$socket.off('message');
 			$socket = undefined;
+			// Log disconnecting
+			$log({
+				title: 'disconnected from socket server'
+			});
 		}
 		console.log('disconnected from socket server');
 	}
@@ -94,6 +102,15 @@
 				};
 				// Save the message
 				$globalState.messages = [...$globalState.messages, decryptedMessage];
+				// Log decrypted message
+				$log({
+					title: 'Received a message',
+					more: {
+						to: decryptedMessage.to,
+						from: decryptedMessage.from,
+						message: decryptedMessage.content
+					}
+				});
 			}
 		} else if (message.subject === 'text-message' && 'IK' in message) {
 			// Search for all the SKs associated with this sender
@@ -105,7 +122,7 @@
 			if (SK) {
 				if (message.content && message.iv) {
 					// Decrypt the message.
-					const decryptMessage = {
+					const decryptedMessage = {
 						subject: message.subject,
 						to: message.to,
 						from: message.from,
@@ -113,7 +130,16 @@
 						timestamp: message.timestamp
 					};
 					// Save the message.
-					$globalState.messages = [...$globalState.messages, decryptMessage];
+					$globalState.messages = [...$globalState.messages, decryptedMessage];
+					// Log decrypted message
+					$log({
+						title: 'Decrypted a message',
+						more: {
+							to: decryptedMessage.to,
+							from: decryptedMessage.from,
+							message: decryptedMessage.content
+						}
+					});
 				}
 			}
 		}
@@ -129,6 +155,16 @@
 			const keyBundle = await $protocol.generateKeyBundle();
 			const preparedKeyBundle = $protocol.prepareKeyBundle(keyBundle);
 			$socket?.emit('keys:upload', { newSession: true, keyBundle: preparedKeyBundle });
+			// Log publishing the keys
+			$log({
+				title: 'Published key bundle to server',
+				more: {
+					IK: preparedKeyBundle.IK,
+					SPK: preparedKeyBundle.SPK.publicKey,
+					OPK1: preparedKeyBundle.OPKs[0].publicKey,
+					OPK2: preparedKeyBundle.OPKs[1].publicKey
+				}
+			});
 
 			// Derive keys from all sessions associated with this user.
 			$socket?.emit(
@@ -137,7 +173,7 @@
 				(response: { status: string; data: PreparedKeyBundle[] }) => {
 					response.data.forEach(async (sessionKeys) => {
 						if ($globalState.user && $socket) {
-							// preform a ECDH.
+							// Preform a ECDH.
 							const DHResult = await $protocol.deriveFromBundle(sessionKeys);
 							const SK: SharedSecret = {
 								username: $globalState.user?.username,
@@ -146,10 +182,10 @@
 								AD: DHResult.AD,
 								salt: DHResult.salt
 							};
-							// save the key
+							// Save the key
 							const SKs = await $protocol.store.getKeys<SharedSecret[]>([{ name: 'SKs' }]);
 							await $protocol.store.updateKeys({ SKs: [...SKs, SK] });
-							// create the message
+							// Create the message
 							const message: IInitialMessage = {
 								subject: 'ecdh-message',
 								to: $globalState.user.username,
@@ -161,8 +197,25 @@
 								SPK_ID: sessionKeys.SPK.id,
 								OPK_ID: sessionKeys.OPK?.id
 							};
-							// send a ecdh message
+							// Send a ecdh message
 							$socket.emit('message', message);
+							// Log publishing the keys
+							$log({
+								title: 'Published key bundle to server',
+								more: {
+									IK: preparedKeyBundle.IK,
+									SPK: preparedKeyBundle.SPK.publicKey,
+									OPK1: preparedKeyBundle.OPKs[0].publicKey,
+									OPK2: preparedKeyBundle.OPKs[1].publicKey
+								}
+							});
+							// Log Deriving keys
+							$log({
+								title: 'Performed ECDH with personal session',
+								more: {
+									IK: sessionKeys.IK
+								}
+							});
 						}
 					});
 				}
@@ -184,7 +237,6 @@
 								SPKs: ExportedSignedKeyPair[];
 							}>([{ name: 'SPKs', filters: { timeFilter: 'newest-key' } }]);
 							const SPK = SPKs[0];
-							// Update the SPK if the timestamp is old enough.
 							const timeLimit = Date.now() - 1000 * 60 * 60 * 48;
 							if (keys.SPK && SPK.timestamp > timeLimit && keys.IK) {
 								const newSPK = await $protocol.regenerateSPK(<ArrayBuffer>keys.IK.privateKey);
@@ -195,21 +247,52 @@
 										SPK: newSPK
 									}
 								});
+								// Log Updating SPK
+								$log({
+									title: 'Updated SPK',
+									more: {
+										SPK: newSPK.publicKey,
+										signature: newSPK.signature
+									}
+								});
 							}
 
 							// Remove old SPKs.
 							const filterResult = await $protocol.store.getKeys<{
 								SPKs: ExportedSignedKeyPair[];
 							}>([{ name: 'SPKs', filters: { timeFilter: 'less-than-92-hours' } }]);
-							await $protocol.store.updateKeys({ SPKs: filterResult.SPKs });
+							if (filterResult.SPKs.length > 0) {
+								await $protocol.store.updateKeys({ SPKs: filterResult.SPKs });
+								// Log removing old SPKs
+								for (let SPK of filterResult.SPKs) {
+									$log({
+										title: 'Removed old SPKs',
+										more: {
+											SPK: $protocol.decode(SPK.publicKey as ArrayBuffer),
+											signature: $protocol.decode(SPK.signature as ArrayBuffer)
+										}
+									});
+								}
+							}
 
 							// Refill OPKs.
-							$socket?.emit('keys:check', (response: { status: string; needKeys: boolean }) => {
-								if (response.needKeys) {
-									const OPKs = $protocol.regenerateOPKs();
-									$socket?.emit('keys:upload', OPKs);
+							$socket?.emit(
+								'keys:check',
+								async (response: { status: string; needKeys: boolean }) => {
+									if (response.needKeys) {
+										const OPKs = await $protocol.regenerateOPKs();
+										$socket?.emit('keys:upload', OPKs);
+										// Log refiling OPKs
+										$log({
+											title: 'Refilled the server list of OPKs',
+											more: {
+												OPK1: OPKs[0].publicKey,
+												OPK2: OPKs[1].publicKey
+											}
+										});
+									}
 								}
-							});
+							);
 						}
 					}
 				);

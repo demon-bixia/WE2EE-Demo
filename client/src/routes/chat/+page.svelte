@@ -16,6 +16,7 @@
 	import Bob from '../../assets/vectors/avatars/round/bob-round.svg';
 
 	const globalState = getContext<Writable<IStoreData>>('globalState');
+	const log = getContext<Writable<(logEntry: any) => void>>('log');
 	const socket = getContext<Writable<Socket<any>>>('socket');
 	const disconnect = getContext<() => void>('disconnect');
 	const protocol = getContext<Writable<Protocol>>('protocol');
@@ -77,7 +78,24 @@
 					};
 
 					$socket.emit('message', message);
+
 					// Forward the message to other sessions associated with this user.
+					const { SKs } = await $protocol.store.getKeys<{ SKs: SharedSecret[] }>([
+						{ name: 'SKs', filters: { username: $globalState.user.username } }
+					]);
+					for (let SK of SKs) {
+						$socket.emit('message', { ...message, IK: $protocol.decode(SK.IK) });
+					}
+
+					// Log sending a message
+					$log({
+						title: 'Sent a text message',
+						more: {
+							to: to,
+							from: $globalState.user.username,
+							message: message.content
+						}
+					});
 				}
 			} else {
 				//  request for a key bundle
@@ -117,6 +135,17 @@
 								};
 								// send the message
 								$socket.emit('message', message);
+								// Log sending the first message.
+								$log({
+									title: 'Sent initial message',
+									more: {
+										message: message.content,
+										IK: $protocol.decode(IK.publicKey as ArrayBuffer),
+										EK: $protocol.decode(DHResult.EK),
+										SPK_ID: response.data.SPK.id,
+										OPK_ID: response.data.OPK?.id
+									}
+								});
 							}
 						}
 					}

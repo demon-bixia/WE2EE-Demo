@@ -33,8 +33,6 @@ async function handler(io: Server, defaultSocket: Socket) {
   // disconnected users
   socket.on("disconnect", (reason: any) => onDisconnect(socket, reason));
 
-  // set the username on the socket
-  socket.data["username"] = (socket.request.user as IUser).username;
   // log new connections
   logger.info(
     `new socket connection established by user: ${socket.data["username"]} with socket #id: ${socket.id}`,
@@ -84,11 +82,11 @@ async function onAssociateSession(payload: { sessionId: string, signature: strin
   socket.data["sessionId"] = payload.sessionId;
 
   // Check for message in queue and send them.
-  const messages = await redisClient.get(`${socket.data.username}:${socket.data.sessionId}:messages`);
+  const messages = await redisClient.get(`${socket.data.sessionId}:messages`);
   const parsedMessages: { messages: IMessage[] } | null = JSON.parse(messages || '{}');
   if (parsedMessages && Array.isArray(parsedMessages.messages)) {
     await socket.emit("queued-messages", parsedMessages.messages);
-    await redisClient.del(`${socket.data.username}:${socket.data.sessionId}:messages`);
+    await redisClient.del(`${socket.data.sessionId}:messages`);
   }
 
   callback({
@@ -283,16 +281,16 @@ async function onMessage(payload: { message: IMessage | IInitialMessage; }, io: 
 
   // send the message
   const sockets = await io.fetchSockets();
-  const receiverSocket = sockets.find((socket) => socket.data.username === payload.message.to && socket.data.sessionId === payload.message.IK);
+  const receiverSocket = sockets.find((socket) => socket.data.sessionId === payload.message.IK);
   // if not found save the message.
   if (!receiverSocket) {
-    let messages = await redisClient.get(`${payload.message.to}:${socket.data.sessionId}:messages`);
+    let messages = await redisClient.get(`${socket.data.sessionId}:messages`);
     if (!messages) {
-      await redisClient.set(`${payload.message.to}:${socket.data.sessionId}:messages`, JSON.stringify({ messages: [payload] }));
+      await redisClient.set(`${socket.data.sessionId}:messages`, JSON.stringify({ messages: [payload] }));
     } else {
       const parsedMessages: { messages: IMessage[] } = JSON.parse(messages);
       const newMessages = [...(parsedMessages.messages || []), payload];
-      await redisClient.set(`${payload.message.to}:${socket.data.sessionId}:messages`, JSON.stringify({ messages: newMessages }));
+      await redisClient.set(`${socket.data.sessionId}:messages`, JSON.stringify({ messages: newMessages }));
     }
   } else {
     // send the message

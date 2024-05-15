@@ -76,7 +76,7 @@ visit https://localhost:5173, your browser will show a warning just ignore it a 
 - [x] add a please allow indexedDB dialog.
 - [x] add client storage (local storage).
 - [x] integrate the protocol
-- [] log protocol information.
+- [x] log protocol information.
 
 
 ### library

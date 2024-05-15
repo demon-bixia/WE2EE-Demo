@@ -7,7 +7,7 @@ export interface IUser {
 }
 
 export interface ILogEntry {
-  date: string;
+  time: string;
   title: string;
   more?: {
     [key: string]: string | number;

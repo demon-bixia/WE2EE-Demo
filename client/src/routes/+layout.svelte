@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { IStoreData } from '../types';
+	import type { IStoreData, ILogEntry } from '../types';
 
 	import { goto } from '$app/navigation';
 	import { onMount, setContext } from 'svelte';
@@ -17,6 +17,21 @@
 		messages: []
 	});
 	setContext('globalState', globalState);
+
+	/**
+	 * Adds log entries to the end of the logEntries array.
+	 */
+	function log(logEntry: { title: string; more?: { [key: string]: string | number } }) {
+		const currentTime = new Date();
+		const hours = currentTime.getHours().toString().padStart(2, '0');
+		const minutes = currentTime.getMinutes().toString().padStart(2, '0');
+		const formattedTime = `${hours}:${minutes}`;
+		globalState.set({
+			...$globalState,
+			logEntries: [...$globalState.logEntries, { time: formattedTime, ...logEntry }]
+		});
+	}
+	setContext('log', log);
 
 	onMount(async () => {
 		// if user is not authenticated then redirect to /login

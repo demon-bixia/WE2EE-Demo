@@ -31,7 +31,7 @@
 <div class="entry-container">
 	<div class="top">
 		<div class="basic-info">
-			<p class="date body-1">{entry.date}</p>
+			<p class="date body-1">{entry.time}</p>
 			<div class="circle-container">
 				<span class="circle"></span>
 				<div class="connector"></div>
@@ -227,9 +227,6 @@
 
 		.detail-container {
 			flex-basis: 40%;
-		}
-
-		.detail {
 		}
 	}
 
