@@ -10,8 +10,6 @@
 
 	import './layout.css';
 
-	export let data: IStoreData;
-
 	const globalState = writable<IStoreData>({
 		loading: true,
 		protocolLog: true,
@@ -19,12 +17,29 @@
 		messages: []
 	});
 	setContext('globalState', globalState);
-	globalState.set(data);
 
 	onMount(async () => {
 		// if user is not authenticated then redirect to /login
 		if (!$globalState.user && window.location.pathname !== '/login') await goto('/login');
 		else if ($globalState.user && window.location.pathname !== '/chat') await goto('/chat');
+
+		// set the data collect from the localStorage
+		if ($globalState.user) {
+			const data = JSON.parse(
+				window.localStorage.getItem(`${$globalState.user.username}Data`) || 'null'
+			);
+			if (data) {
+				globalState.set(data);
+			}
+		}
+
+		// subscribe to changes in state and update localStorage
+		globalState.subscribe((value) => {
+			if ($globalState.user) {
+				window.localStorage.setItem(`${$globalState.user.username}Data`, JSON.stringify(value));
+			}
+		});
+
 		// stop loading after a second of redirecting
 		setTimeout(() => {
 			$globalState.loading = false;

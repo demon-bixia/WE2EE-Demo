@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { getContext } from 'svelte';
-	import type { Socket } from 'socket.io-client';
 	import type { Writable } from 'svelte/store';
 	import type { IStoreData, IGetTokenResponseData } from '../../types';
 
@@ -13,10 +12,7 @@
 
 	import { ArrowLongRight, Icon } from 'svelte-hero-icons';
 
-	import FAKE_DATA from '../../fake-data';
-
 	const globalState = getContext<Writable<IStoreData>>('globalState');
-	const socket = getContext<Writable<Socket<any>>>('socket');
 
 	// (event): handle authenticating as alice or bob.
 	async function handleGetToken(username: string) {
@@ -35,11 +31,16 @@
 			// handle response
 			if (response.status === 200) {
 				if (result.user && result.token) {
+					// set the data collect from the localStorage
+					const data = JSON.parse(
+						window.localStorage.getItem(`${result.user.username}Data`) || '{}'
+					);
 					// set the user on global state and load data from client store
 					globalState.set({
-						...FAKE_DATA,
+						...$globalState,
+						...data,
 						loading: false,
-						user: { ...result.user, status: 'Offline', authToken: result.token }
+						user: { ...result.user, authToken: result.token }
 					});
 				}
 				// redirect to chat

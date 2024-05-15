@@ -38,8 +38,6 @@
 		<div class="protocol-log">
 			{#each $globalState.logEntries as entry}
 				<LogEntry {entry} />
-			{:else}
-				<p>no events to log</p>
 			{/each}
 		</div>
 
@@ -65,6 +63,7 @@
 
 	.sidebar {
 		height: 100%;
+		min-width: 400px;
 		background: #ffffff;
 		display: flex;
 		flex-direction: column;
@@ -137,7 +136,7 @@
 		flex-direction: column;
 		flex: 1;
 		padding: 1.5rem;
-		overflow-y: scroll;
+		overflow-y: auto;
 	}
 
 	.sidebar .footer-container {
@@ -158,7 +157,8 @@
 			z-index: 1000;
 			right: 0;
 			height: 100%;
-			overflow: hidden;
+			min-width: auto;
+			overflow: auto;
 		}
 
 		.sidebar.close {

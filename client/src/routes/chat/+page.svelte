@@ -1,11 +1,13 @@
 <script lang="ts">
-	import type { Writable } from 'svelte/store';
-	import type { IStoreData } from '../../types';
+	import type Protocol from '$lib/WE2EE';
+	import type { KeyStoreKeys, PreparedKeyBundle, SharedSecret } from '$lib/WE2EE/types';
 	import type { Socket } from 'socket.io-client';
+	import type { Writable } from 'svelte/store';
+	import type { IInitialMessage, IMessage, IStoreData } from '../../types';
 
 	import Dropdown from '$lib/components/Dropdown.svelte';
 	import Modal from '$lib/components/Modal.svelte';
-	import { EllipsisHorizontal, Icon, PaperAirplane } from 'svelte-hero-icons';
+	import { CircleStack, EllipsisHorizontal, Icon, PaperAirplane } from 'svelte-hero-icons';
 
 	import { goto } from '$app/navigation';
 	import { getContext } from 'svelte';
@@ -16,6 +18,7 @@
 	const globalState = getContext<Writable<IStoreData>>('globalState');
 	const socket = getContext<Writable<Socket<any>>>('socket');
 	const disconnect = getContext<() => void>('disconnect');
+	const protocol = getContext<Writable<Protocol>>('protocol');
 
 	// (event) handles logging out.
 	function handleLogout() {
@@ -45,19 +48,81 @@
 		if (
 			event instanceof KeyboardEvent &&
 			(!(event.key === 'Enter' && event.ctrlKey) || !textareaFocus)
-		)
+		) {
 			return;
+		}
 		if (textareaValue && $globalState.user) {
 			event.preventDefault();
-			const currentDate = new Date();
-			const message = {
-				subject: 'text-message',
-				from: $globalState.user.username,
-				to: $globalState.user.username === 'Alice' ? 'Bob' : 'Alice',
-				content: textareaValue,
-				timestamp: currentDate.getTime()
-			};
-			await $socket.emit('message', message);
+			const currentDate = Date.now();
+			// find the user you want to communicate with
+			const to = $globalState.user.username === 'Alice' ? 'Bob' : 'Alice';
+			// search for the SK of the user you want to communicate with.
+			const toSKs = await $protocol.store.getKeys<SharedSecret[] | undefined>([
+				{ name: 'SKs', filters: { id: to } }
+			]);
+
+			if (toSKs && toSKs.length > 0) {
+				// encrypt message and send it to all the sessions
+				for (let SK of toSKs) {
+					const IV = $protocol.generateIV();
+					const encryptedContent = await $protocol.encrypt(SK.SK, IV, textareaValue);
+					const message: IMessage = {
+						subject: 'text-message',
+						to: to,
+						from: $globalState.user.username,
+						content: encryptedContent,
+						timestamp: currentDate,
+						iv: $protocol.decode(IV),
+						IK: $protocol.decode(SK.IK)
+					};
+
+					$socket.emit('message', message);
+					// Forward the message to other sessions associated with this user.
+				}
+			} else {
+				//  request for a key bundle
+				$socket.emit(
+					'keys:request',
+					async (response: { status: string; data: PreparedKeyBundle }) => {
+						if (response.status === 'Ok' && response.data && $globalState.user) {
+							// preform a ECDH.
+							const DHResult = await $protocol.deriveFromBundle(response.data);
+							const SK = {
+								username: to,
+								IK: DHResult.IK,
+								SK: DHResult.SK,
+								AD: DHResult.AD,
+								salt: DHResult.salt
+							};
+							// save the key
+							const SKs = await $protocol.store.getKeys<SharedSecret[]>([{ name: 'SKs' }]);
+							await $protocol.store.updateKeys({ SKs: [...SKs, SK] });
+							// encrypt message
+							const { IK } = await $protocol.store.getKeys<KeyStoreKeys>([{ name: 'IK' }]);
+							if (IK?.publicKey) {
+								const IV = $protocol.generateIV();
+								const encryptedContent = await $protocol.encrypt(SK.SK, IV, textareaValue);
+								const message: IInitialMessage = {
+									subject: 'ecdh-message',
+									to: to,
+									from: $globalState.user.username,
+									content: encryptedContent,
+									timestamp: currentDate,
+									iv: $protocol.decode(IV),
+									salt: $protocol.decode(SK.salt),
+									IK: $protocol.decode(IK.publicKey as ArrayBuffer),
+									EK: $protocol.decode(DHResult.EK),
+									SPK_ID: response.data.SPK.id,
+									OPK_ID: response.data.OPK?.id
+								};
+								// send the message
+								$socket.emit('message', message);
+							}
+						}
+					}
+				);
+			}
+			// Perform key exchange if SK doesn't exist.
 			textareaValue = '';
 		}
 	}
@@ -73,6 +138,8 @@
 	function handleToggleVerificationModal() {
 		OpenVerificationModal = !OpenVerificationModal;
 	}
+
+	let OpenAllowIndexedDBModal = false;
 
 	// (event) opens the protocol log
 	function handleOpenProtocolLog() {
@@ -92,9 +159,7 @@
 				/>
 				<div>
 					<p class="body-1 name">{$globalState.user.username === 'Alice' ? 'Bob' : 'Alice'}</p>
-					<p class="body-1 status" class:online={$globalState.user.status === 'Online'}>
-						{$globalState.user.status}
-					</p>
+					<p class="body-1 status" class:online={true}>Online</p>
 				</div>
 			</div>
 			<div class="dropdown-menu-wrapper">
@@ -152,18 +217,33 @@
 				<Icon style="color:#ffffff;" src={PaperAirplane} solid size="24" />
 			</button>
 		</div>
-		<!--modal-->
+		<!--verification modal-->
 		<Modal open={OpenVerificationModal}>
 			<div class="modal">
 				<header class="header">
 					<h6 class="heading-2 title">Confirm Identity of user</h6>
-					<p class="body-1 description">Ask the other part to confirm this code on thier device.</p>
+					<p class="body-1 description">Ask the other part to confirm this code on their device.</p>
 				</header>
 				<div class="code-container body-1">
 					Code:
 					<p class="code body-1">1201920801222210282741023</p>
 				</div>
 				<button class="close-button" on:click={handleToggleVerificationModal}>Close</button>
+			</div>
+		</Modal>
+		<!--allow IndexedDB modal-->
+		<Modal open={OpenAllowIndexedDBModal}>
+			<div class="modal">
+				<div class="allow-indexedDB-dialog">
+					<Icon style="color:#407BFF;stroke-width:1;" src={CircleStack} size="52" />
+					<div class="dialog-details">
+						<h1 class="heading-2">Database Access</h1>
+						<p class="body-1">
+							This app needs access to IndexedDB in order to store the cryptographic keys used by
+							the protocol
+						</p>
+					</div>
+				</div>
 			</div>
 		</Modal>
 	</section>
@@ -293,12 +373,12 @@
 		padding: 1.5rem 1rem;
 		background: #ffffff;
 		border-radius: 0.75rem;
-		width: 18.75rem;
+		width: 20.75rem;
 		display: flex;
 		flex-direction: column;
 		justify-content: center;
 		align-items: center;
-		gap: 1.5rem;
+		gap: 1rem;
 	}
 
 	.modal .header {
@@ -343,6 +423,18 @@
 		border: 0.0625rem solid var(--light-red);
 		color: var(--red);
 		outline: none;
+	}
+
+	.modal .allow-indexedDB-dialog {
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		align-items: center;
+	}
+
+	.modal .dialog-details {
+		margin-top: 8px;
+		text-align: center;
 	}
 
 	/**** Tablet Screens ****/

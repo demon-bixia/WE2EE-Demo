@@ -1,19 +1,9 @@
 import type { Socket } from 'socket.io-client';
-
-
-export interface Session {
-  _id: number;
-}
+import type { InitialMessageKeys } from '$lib/WE2EE/types';
 
 export interface IUser {
   username: string;
-  status?: string;
   authToken?: string;
-  IDK?: string;
-  SPK?: string;
-  preKeys: string[];
-  sessions: Session[];
-
 }
 
 export interface ILogEntry {
@@ -24,26 +14,45 @@ export interface ILogEntry {
   };
 }
 
-export interface IMessage {
-	subject: string;
-  from: string;
+export interface ISavedMessage {
+  subject: string;
   to: string;
+  from: string;
   content: string;
-	timestamp: string;
+  timestamp: number;
+}
+
+export interface IMessage {
+  subject: string;
+  to: string;
+  from: string;
+  content: string;
+  timestamp: number;
+  IK: string;
+  iv: string;
+}
+
+export interface IInitialMessage extends InitialMessageKeys {
+  subject: string;
+  to: string;
+  from: string;
+  content?: string;
+  timestamp: number;
+  IK: string;
+  iv?: string;
 }
 
 export interface IStoreData {
   socket?: Socket<any>,
   loading: boolean;
   protocolLog: boolean;
-	user?: IUser;
+  user?: IUser;
   logEntries: ILogEntry[];
-  messages: IMessage[];
+  messages: ISavedMessage[];
 }
 
 export interface IGetTokenResponseData {
-	user?: IUser;
-	message?: string;
-	token?: string;
+  user?: IUser;
+  message?: string;
+  token?: string;
 }
-

@@ -22,23 +22,21 @@
 - [x] add login logic.
 - [x] add socket communication.
 - [x] send and receive messages
-- [] make responsive.
+- [x] make responsive.
+- [x] add error page.
+- [x] add a please allow indexedDB dialog.
+- [x] add client storage (local storage).
+- [x] integrate the protocol
+- [] log protocol information.
 
 
 ### library
 
-- [] implement X3DH.
-- [] implement AES message encryption.
-- [] implement EdDSA signing.
-- [] implement identity verification.
-
-
-### client storage
-
-- [] add client storage.
-
-
-### session sync
-
-- [] implement Sync.
-
+- [x] implement X3DH.
+- [x] implement AES message encryption.
+- [x] implement EcDSA signing.
+- [x] implement identity verification.
+- [x] implement secure key store.
+- [x] implement sync.
+- [x] add old keys management.
+- [x] key deletion
