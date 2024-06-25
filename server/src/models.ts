@@ -1,14 +1,17 @@
+import type { IKeyWithId, ISession, IUser } from '@src/types/types';
 import mongoose, { Schema } from 'mongoose';
-import type { IKeyWithId, IUser, ISession } from './types/types';
 
 
 // **** Variables **** //
 
+// a public key with an id
 const keyWithIdSchema = new Schema<IKeyWithId>({
   id: String,
-  key: String,
+  publicKey: String,
+  signature: String,
 });
 
+// keys tied to a session
 const sessionSchema = new Schema<ISession>({
   IK: String,
   SPK: keyWithIdSchema,
@@ -16,9 +19,11 @@ const sessionSchema = new Schema<ISession>({
   main: Boolean,
 });
 
-// User Model
+// user data base object
 const userSchema = new Schema<IUser>({
   username: { type: String, maxLength: 255, unique: true, index: true },
   sessions: [sessionSchema]
 });
+
+// user mongoose model
 export const UserModel = mongoose.model<IUser>('User', userSchema);

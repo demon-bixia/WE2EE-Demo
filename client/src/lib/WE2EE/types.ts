@@ -3,42 +3,53 @@
  */
 
 
-/**
- * An EC key pair exported in spki format
- */
-export interface ExportedKeyPair { publicKey: ArrayBuffer | string; privateKey?: ArrayBuffer | string; }
+// **** Generated Keys **** //
 
-/**
- * An EC signed pre-key pair exported in spki format
- */
-export interface ExportedSignedKeyPair extends ExportedKeyPair { id: string; signature: ArrayBuffer | string; timestamp: number; }
+export interface KeyPair { publicKey: ArrayBuffer; privateKey: CryptoKey; }
 
-/**
- * An EC one time pre-key pair exported in spki format.
- */
-export interface ExportedOPK extends ExportedKeyPair { id: string; }
+export interface SignedKeyPair extends KeyPair { id: string; signature: ArrayBuffer; timestamp: number; }
 
-/**
- * A collection of keys used for the ECDH exchange exported in spki format.
- */
-export interface ExportedKeyBundle {
-  IK: ExportedKeyPair;
-  SPK: ExportedSignedKeyPair;
-  OPKs: ExportedOPK[];
+export interface OPK extends KeyPair { id: string; }
+
+export interface KeyBundle {
+  IK: KeyPair;
+  SPK: SignedKeyPair;
+  OPKs: OPK[];
 }
 
-/**
- * The key bundle received from the server
- */
+
+// **** Prepared Keys **** //
+
+export interface PreparedKeyPair { publicKey: string; }
+
+export interface PreparedSignedKeyPair extends PreparedKeyPair { id: string; signature: string; timestamp: number; }
+
+export interface PreparedOPK extends PreparedKeyPair { id: string; }
+
 export interface PreparedKeyBundle {
-  IK: { publicKey: string };
-  SPK: { id: string; publicKey: string; signature: string; timestamp: number; };
-  OPK?: { id: string; publicKey: string; };
+  IK: string;
+  SPK: PreparedSignedKeyPair;
+  OPKs: PreparedOPK[];
 }
 
-/**
- * The keys sent with the initial message.
- */
+
+// **** Received Keys **** //
+
+export interface ReceivedKeyPair { publicKey: string; }
+
+export interface ReceivedSignedKeyPair extends ReceivedKeyPair { id: string; signature: string; timestamp: number; }
+
+export interface ReceivedOPK extends ReceivedKeyPair { id: string; }
+
+export interface ReceivedKeyBundle {
+  IK: string;
+  SPK: ReceivedSignedKeyPair;
+  OPK?: ReceivedOPK;
+}
+
+
+// **** ECDH Types **** //
+
 export interface InitialMessageKeys {
   IK: string;
   EK: string;
@@ -47,48 +58,30 @@ export interface InitialMessageKeys {
   salt: string;
 }
 
-/**
- * The result of the ECDH exchange.
- * IK is the public key of the other party you performed the exchange with. 
- */
 export interface SharedSecret {
   username: string;
-  IK: ArrayBuffer;
-  SK: ArrayBuffer;
+  IK: string;
+  SK: CryptoKey;
   AD: ArrayBuffer;
   salt: ArrayBuffer;
 }
 
-/**
- * Keys stored in the key store.
- */
+
+// **** Store types **** //
+
 export interface KeyStoreKeys {
-  [key: string]: undefined | ExportedKeyPair | ExportedSignedKeyPair[] | ExportedOPK[] | SharedSecret[];
-  IK?: ExportedKeyPair;
-  SPKs?: ExportedSignedKeyPair[];
-  OPKs?: ExportedOPK[];
-  SKs?: SharedSecret[];
+  [key: string]: undefined | KeyPair | SignedKeyPair[] | OPK[] | SharedSecret[];
+  IK?: KeyPair;
+  SPKs?: SignedKeyPair[];
+  OPKs?: OPK[];
+  SSs?: SharedSecret[];
 }
 
-/**
- * All the keys stored in the key store.
- */
-export interface AllKeyStoreKeys {
-  [key: string]: undefined | ExportedKeyPair | ExportedSignedKeyPair[] | ExportedOPK[] | SharedSecret[];
-  IK?: {publicKey: ArrayBuffer, privateKey:ArrayBuffer;};
-  SPKs?: {id:string; publicKey: ArrayBuffer, privateKey:ArrayBuffer; signature: ArrayBuffer; timestamp:number;}[];
-  OPKs?:  {id:string; publicKey: ArrayBuffer, privateKey:ArrayBuffer;}[];
-  SKs?: SharedSecret[];
-}
-
-
-/**
- * The get query passed as parameter to the KeyStore.getKeys() method.
- */
 export interface KeyStoreQuery {
   name: string;
   filters?: {
     id?: string;
+    IK?: string;
     username?: string;
     timeFilter?: 'newest-key' | 'less-than-92-hours' | 'more-than-92-hours';
   }

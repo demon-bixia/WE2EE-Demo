@@ -1,12 +1,13 @@
 import type { IReq, IRes } from '@src/types/express/misc';
 
+import { Router } from 'express';
+
 import HttpStatusCodes from '@src/constants/HttpStatusCodes';
+import Paths from '@src/constants/Paths';
 import { UserModel } from '@src/models';
 import { generateAccessToken } from '@src/utils';
 
-import { Router } from 'express';
 
-import Paths from '@src/constants/Paths';
 
 
 // **** Functions **** //
@@ -34,17 +35,13 @@ async function getToken(req: IReq, res: IRes) {
 
 // **** Add Routes **** //
 
-// Base routes
-const apiRouter = Router();
 // Authentication routes
 const authRouter = Router();
 
 // Generate token route.
 authRouter.post(Paths.Auth.GetToken, getToken);
-// Add AuthRouter
-apiRouter.use(Paths.Auth.Base, authRouter);
 
 
 // **** Export default **** //
 
-export default apiRouter
+export default authRouter

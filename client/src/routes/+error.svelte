@@ -1,5 +1,6 @@
 <script>
 	import Dragon from '../assets/vectors/dragon.svg';
+	import './error.css';
 </script>
 
 <section class="page-container">
@@ -25,63 +26,3 @@
 		</p>
 	</footer>
 </section>
-
-<style>
-	.page-container {
-		width: 100%;
-		height: 100vh;
-		display: flex;
-		flex-direction: column;
-		justify-content: space-between;
-		align-items: center;
-	}
-
-	.error-container {
-		width: 100%;
-		height: 100%;
-		display: flex;
-		justify-content: center;
-		align-items: center;
-	}
-
-	.error-details {
-		max-width: 450px;
-	}
-
-	.title {
-		margin-bottom: 8px;
-	}
-
-	.footer-container {
-		display: flex;
-		justify-content: center;
-		align-items: center;
-		padding: 1.5rem 0rem;
-		width: 100%;
-		border-top: 0.0625rem solid rgba(0, 0, 0, 0.1);
-	}
-
-	/**** Tablet Screens ****/
-	@media only screen and (width < 56.25rem) {
-		.page-container {
-			padding: 16px;
-		}
-
-		.error-container {
-			flex-direction: column;
-		}
-
-		.error-image {
-			width: 350px;
-			margin-bottom: 24px;
-		}
-
-		.title {
-			text-align: center;
-		}
-
-		.description {
-			text-align: center;
-		}
-	}
-</style>

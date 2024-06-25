@@ -1,4 +1,3 @@
-import type { IUser } from '@src/models/UserModel';
 import * as e from 'express';
 
 

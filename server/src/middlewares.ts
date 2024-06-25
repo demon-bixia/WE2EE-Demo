@@ -2,9 +2,7 @@
  * json web token middleware
  */
 import type { IReq, IRes } from '@src/types/express/misc';
-
 import { verifyToken } from '@src/utils';
-import { RouteError } from '@src/errors';
 
 
 // **** Functions **** //
@@ -33,7 +31,7 @@ export async function WSAuthenticateToken(req: IReq, _: IRes, next: Function) {
     if (!decoded) return next(new Error("invalid token"));
     req.user = decoded;
     next();
-  } catch (err) {
-    if (err instanceof RouteError) return next(new Error("invalid token"));
+  } catch (error) {
+    return next(new Error("invalid token"));
   }
 }

@@ -1,5 +1,5 @@
-import type { Socket } from 'socket.io-client';
 import type { InitialMessageKeys } from '$lib/WE2EE/types';
+import type { Socket } from 'socket.io-client';
 
 export interface IUser {
   username: string;
@@ -42,17 +42,27 @@ export interface IInitialMessage extends InitialMessageKeys {
   iv?: string;
 }
 
-export interface IStoreData {
-  socket?: Socket<any>,
-  loading: boolean;
-  protocolLog: boolean;
-  user?: IUser;
-  logEntries: ILogEntry[];
-  messages: ISavedMessage[];
-}
-
 export interface IGetTokenResponseData {
   user?: IUser;
   message?: string;
   token?: string;
+}
+
+export interface ISocketClient {
+  socket?: Socket<any>;
+  connect?: () => void;
+  disconnect?: () => void;
+  setupKeys?: () => void;
+  receiveMessage?: (message: IMessage | IInitialMessage) => void;
+  sendMessage?: (messageContent: string) => void;
+}
+
+export interface IStoreData {
+  socketClient?: ISocketClient;
+  loading: boolean;
+  IDBPermissionDenied: boolean;
+  protocolLog: boolean;
+  user?: IUser;
+  logEntries: ILogEntry[];
+  messages: ISavedMessage[];
 }

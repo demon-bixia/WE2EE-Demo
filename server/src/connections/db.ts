@@ -2,36 +2,13 @@ import envVars from '@src/constants/EnvVars';
 import { UserModel } from '@src/models';
 import logger from 'jet-logger';
 import mongoose from 'mongoose';
-import { createClient, RedisClientType } from 'redis';
 
-
-// **** Variables **** //
-
-export let redisClient: RedisClientType;
-
-
-// **** Functions **** //
-
-/**
- * starts a connection with redis store
- * @returns Promise<RedisClientType>
- */
-export async function cache() {
-  redisClient = createClient({ url: envVars.Redis.connectionString });
-
-  redisClient.on('error', error => logger.err('Connection to redis failed with error:', error));
-  redisClient.on('ready', () => logger.info('Successfully connected to redis'));
-
-  await redisClient.connect();
-
-  return redisClient;
-}
 
 /**
  * Connect to mongodb
  * @returns Promise<void>
  */
-export async function db() {
+async function db() {
   mongoose.set('strictQuery', false);
   try {
     await mongoose.connect(envVars.Mongo.connectionString);
@@ -60,3 +37,8 @@ export async function db() {
     }
   }
 }
+
+
+// **** Default export  **** //
+
+export default db;

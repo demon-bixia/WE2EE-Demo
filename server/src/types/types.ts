@@ -56,7 +56,8 @@ export interface CompleteKeyBundle {
 
 export interface IKeyWithId {
   id: string;
-  key: string;
+  publicKey: string;
+  signature?: string;
 }
 
 export interface ISession {

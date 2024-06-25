@@ -4,8 +4,10 @@
 
 	import { getContext } from 'svelte';
 
-	import LogEntry from '$lib/components/LogEntry.svelte';
+	import LogEntry from '$lib/components/LogEntry/LogEntry.svelte';
 	import { Icon, MagnifyingGlass } from 'svelte-hero-icons';
+
+	import './layout.css';
 
 	const globalState = getContext<Writable<IStoreData>>('globalState');
 
@@ -15,7 +17,7 @@
 	}
 </script>
 
-<div class="page-container">
+<div class="chat-container">
 	<!--page-->
 	<slot></slot>
 
@@ -53,128 +55,3 @@
 		</footer>
 	</aside>
 </div>
-
-<style>
-	.page-container {
-		display: flex;
-		width: 100%;
-		height: 100vh;
-	}
-
-	.sidebar {
-		height: 100%;
-		min-width: 400px;
-		background: #ffffff;
-		display: flex;
-		flex-direction: column;
-	}
-
-	.sidebar .search-container {
-		padding: 1rem 1.5rem;
-		border-bottom: 0.0625rem solid rgba(0, 0, 0, 0.1);
-		display: flex;
-		justify-content: center;
-		align-items: center;
-		height: 5.5125rem;
-		box-sizing: border-box;
-	}
-
-	.sidebar .search-container .search-input-wrapper {
-		position: relative;
-		flex-basis: 100%;
-	}
-
-	.sidebar .search-container .search-input-wrapper .search-input {
-		box-sizing: border-box;
-		width: 100%;
-		border: 0.0625rem solid rgba(0, 0, 0, 0.1);
-		border-radius: 1rem;
-		padding: 1rem;
-		background: var(--light-gray);
-		font-size: 1rem;
-	}
-
-	.sidebar .search-container .search-input-wrapper .search-input:focus {
-		outline: 0.0625rem solid var(--blue);
-	}
-
-	.sidebar .search-container .search-input-wrapper .search-icon {
-		position: absolute;
-		right: 1rem;
-		top: 23%;
-	}
-
-	.sidebar .search-container .close-button {
-		display: flex;
-		justify-content: center;
-		align-items: center;
-		font-size: 1rem;
-		color: rgba(0, 0, 0, 0.6);
-		padding: 1rem;
-		border-radius: 1rem;
-		text-decoration: none;
-		border: 0.0625rem solid rgba(0, 0, 0, 0.1);
-		transition: all 200ms ease;
-		margin-left: 1rem;
-		display: none;
-	}
-
-	.sidebar .search-container .close-button:hover {
-		border: 0.0625rem solid var(--light-red);
-		color: var(--red);
-	}
-
-	.sidebar .search-container .close-button:focus {
-		box-shadow: 0 0 0.0625rem 0.1875rem var(--light-red);
-		border: 0.0625rem solid var(--light-red);
-		color: var(--red);
-		outline: none;
-	}
-
-	.sidebar .protocol-log {
-		display: flex;
-		flex-direction: column;
-		flex: 1;
-		padding: 1.5rem;
-		overflow-y: auto;
-	}
-
-	.sidebar .footer-container {
-		display: flex;
-		justify-content: center;
-		align-items: center;
-		padding: 1.5rem 0rem;
-		width: 100%;
-		border-top: 0.0625rem solid rgba(0, 0, 0, 0.1);
-		height: 5.5rem;
-		box-sizing: border-box;
-	}
-
-	/**** Tablet Screens ****/
-	@media only screen and (width < 56.25rem) {
-		.sidebar {
-			position: absolute;
-			z-index: 1000;
-			right: 0;
-			height: 100%;
-			min-width: auto;
-			overflow: auto;
-		}
-
-		.sidebar.close {
-			width: 0;
-		}
-
-		.sidebar.open {
-			width: 100%;
-		}
-
-		.sidebar .search-container .close-button {
-			display: block;
-		}
-	}
-
-	/**** Mobile Screens ****/
-	@media only screen and (width < 37.5rem) {
-	}
-</style>

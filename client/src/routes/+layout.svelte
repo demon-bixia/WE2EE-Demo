@@ -1,16 +1,17 @@
 <script lang="ts">
-	import type { IStoreData, ILogEntry } from '../types';
+	import type { IStoreData } from '../types';
 
 	import { goto } from '$app/navigation';
 	import { onMount, setContext } from 'svelte';
 	import { writable } from 'svelte/store';
 
-	import LoadingIndicator from '$lib/components/LoadingIndicator.svelte';
-	import SocketServer from '$lib/components/SocketServer.svelte';
+	import LoadingIndicator from '$lib/components/LoadingIndicator/LoadingIndicator.svelte';
+	import SocketClient from '$lib/components/SocketClient/SocketClient.svelte';
 
 	import './layout.css';
 
 	const globalState = writable<IStoreData>({
+		IDBPermissionDenied: false,
 		loading: true,
 		protocolLog: true,
 		logEntries: [],
@@ -34,26 +35,20 @@
 	setContext('log', log);
 
 	onMount(async () => {
-		// if user is not authenticated then redirect to /login
-		if (!$globalState.user && window.location.pathname !== '/login') await goto('/login');
-		else if ($globalState.user && window.location.pathname !== '/chat') await goto('/chat');
-
-		// set the data collect from the localStorage
-		if ($globalState.user) {
-			const data = JSON.parse(
-				window.localStorage.getItem(`${$globalState.user.username}Data`) || 'null'
-			);
-			if (data) {
-				globalState.set(data);
-			}
+		// Set the data collect from the localStorage
+		const data = JSON.parse(window.localStorage.getItem(`appData`) || 'null');
+		if (data) {
+			globalState.set(data);
 		}
 
-		// subscribe to changes in state and update localStorage
+		// Subscribe to changes in state and update localStorage
 		globalState.subscribe((value) => {
-			if ($globalState.user) {
-				window.localStorage.setItem(`${$globalState.user.username}Data`, JSON.stringify(value));
-			}
+			window.localStorage.setItem(`appData`, JSON.stringify(value));
 		});
+
+		// If user is not authenticated then redirect to /login
+		if (!$globalState.user && window.location.pathname !== '/login') await goto('/login');
+		else if ($globalState.user && window.location.pathname !== '/chat') await goto('/chat');
 
 		// stop loading after a second of redirecting
 		setTimeout(() => {
@@ -68,7 +63,7 @@
 </svelte:head>
 
 <main>
-	<SocketServer>
+	<SocketClient>
 		{#if !$globalState.loading}
 			<slot></slot>
 		{:else}
@@ -76,15 +71,5 @@
 				<LoadingIndicator />
 			</div>
 		{/if}
-	</SocketServer>
+	</SocketClient>
 </main>
-
-<style>
-	.page-loading-container {
-		display: flex;
-		justify-content: center;
-		align-items: center;
-		height: 100vh;
-		width: 100%;
-	}
-</style>

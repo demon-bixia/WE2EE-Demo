@@ -89,4 +89,3 @@ visit https://localhost:5173, your browser will show a warning just ignore it a 
 - [x] implement sync.
 - [x] add old keys management.
 - [x] key deletion
-
