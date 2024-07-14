@@ -58,6 +58,17 @@ export interface InitialMessageKeys {
   salt: string;
 }
 
+export interface DHResult {
+  IK: ArrayBuffer;
+  oddIK: ArrayBuffer;
+  SK: CryptoKey;
+  salt: ArrayBuffer;
+  AD: ArrayBuffer;
+  EK: ArrayBuffer;
+  SPK_ID: string;
+  OPK_ID?: string;
+}
+
 export interface SharedSecret {
   username: string;
   IK: string;

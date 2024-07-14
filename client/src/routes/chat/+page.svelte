@@ -1,12 +1,13 @@
 <script lang="ts">
 	import type { Writable } from 'svelte/store';
-	import type { IStoreData, ISocketClient } from '../../types';
+	import type { ISocketClient, IStoreData } from '../../types';
 
 	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
-	import Modal from '$lib/components/Modal/Modal.svelte';
-	import { CircleStack, EllipsisHorizontal, Icon, PaperAirplane } from 'svelte-hero-icons';
+	import Textarea from '$lib/components/Textarea/Textarea.svelte';
+	import ErrorModal from '$lib/components/ErrorModal/ErrorModal.svelte';
+	import VerificationModal from '$lib/components/VerificationModal/VerificationModal.svelte';
+	import { EllipsisHorizontal, Icon, PaperAirplane } from 'svelte-hero-icons';
 
-	import { goto } from '$app/navigation';
 	import { getContext } from 'svelte';
 
 	import Alice from '../../assets/vectors/avatars/round/alice-round.svg';
@@ -19,15 +20,6 @@
 
 	// (event) handles logging out.
 	function handleLogout() {
-		globalState.set({
-			IDBPermissionDenied: false,
-			loading: false,
-			protocolLog: false,
-			logEntries: [],
-			messages: []
-		});
-		// redirect to login page
-		goto('/login');
 		// disconnect and remove listeners
 		if ($socketClient && $socketClient.disconnect) $socketClient.disconnect();
 	}
@@ -66,10 +58,10 @@
 		displayMenu = !displayMenu;
 	}
 
-	let OpenVerificationModal = false;
+	let openVerificationModal = false;
 	// (event) open the verification
-	function handleToggleVerificationModal() {
-		OpenVerificationModal = !OpenVerificationModal;
+	function handleCloseVerificationModal() {
+		openVerificationModal = !openVerificationModal;
 	}
 
 	// (event) opens the protocol log
@@ -102,7 +94,7 @@
 						<a href="/chat/sessions" on:click={handleToggleMenu} class="menu-item">Sessions</a>
 						<button
 							on:click={handleToggleMenu}
-							on:click={handleToggleVerificationModal}
+							on:click={handleCloseVerificationModal}
 							class="menu-item"
 						>
 							ID Verification
@@ -136,47 +128,25 @@
 		</div>
 		<!--bottom section of chat-->
 		<div class="bottom">
-			<textarea
-				bind:value={textareaValue}
-				on:focus={handleDetectFocus}
-				on:blur={handleDetectBlur}
-				class="message-input"
-				placeholder="Message..."
+			<Textarea
+				bind:textareaValue
+				{handleDetectFocus}
+				{handleDetectBlur}
+				placeholderText="Message..."
 			/>
 			<button on:click={handleSendMessage} class="send-button">
 				Send
 				<Icon style="color:#ffffff;" src={PaperAirplane} solid size="24" />
 			</button>
 		</div>
-		<!--verification modal-->
-		<Modal open={OpenVerificationModal}>
-			<div class="modal">
-				<header class="header">
-					<h6 class="heading-2 title">Confirm Identity of user</h6>
-					<p class="body-1 description">Ask the other part to confirm this code on their device.</p>
-				</header>
-				<div class="code-container body-1">
-					Code:
-					<p class="code body-1">1201920801222210282741023</p>
-				</div>
-				<button class="close-button" on:click={handleToggleVerificationModal}>Close</button>
-			</div>
-		</Modal>
-		<!--allow IndexedDB modal-->
-		<Modal open={$globalState.IDBPermissionDenied}>
-			<div class="modal">
-				<div class="allow-indexedDB-dialog">
-					<Icon style="color:#407BFF;stroke-width:1;" src={CircleStack} size="52" />
-					<div class="dialog-details">
-						<h1 class="heading-2">Unable To Access Database</h1>
-						<p class="body-1">
-							This app needs access to IndexedDB in order to store the cryptographic keys used by
-							the protocol. Please refresh and give permission.
-						</p>
-					</div>
-				</div>
-			</div>
-		</Modal>
 	</section>
+
+	<ErrorModal openErrorModal={$globalState.IDBPermissionDenied} />
+
+	<VerificationModal
+		{openVerificationModal}
+		{handleCloseVerificationModal}
+		username={$globalState.user.username === 'Alice' ? 'Bob' : 'Alice'}
+	/>
 {/if}
 <svelte:window on:keydown={handleSendMessage} />

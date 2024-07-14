@@ -1,8 +1,9 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
-	import { getContext } from 'svelte';
 	import type { Writable } from 'svelte/store';
 	import type { IStoreData, IGetTokenResponseData } from '../../types';
+
+	import { goto } from '$app/navigation';
+	import { getContext } from 'svelte';
 
 	import Alice from '../../assets/vectors/avatars/regular/alice.svg';
 	import Bob from '../../assets/vectors/avatars/regular/bob.svg';

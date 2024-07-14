@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Writable } from 'svelte/store';
-	import type { IInitialMessage, IMessage, ISocketClient, IStoreData } from '../../../types';
+	import type { IECDHMessage, ITextMessage, ISocketClient, IStoreData } from '../../../types';
 
 	import { goto } from '$app/navigation';
 	import { io } from 'socket.io-client';
@@ -11,7 +11,6 @@
 	const globalState = getContext<Writable<IStoreData>>('globalState');
 	const socketClient = getContext<Writable<ISocketClient>>('socketClient');
 	const protocol = getContext<Writable<Protocol>>('protocol');
-	const log = getContext<(logEntry: any) => void>('log');
 
 	/**
 	 *  A function thar connects to the socket server and adds event handlers.
@@ -53,29 +52,27 @@
 				}
 			});
 			// (event) handles connection errors.
-			$socketClient.socket.io.on('error', (error) => {
-				if (error) {
-					globalState.set({
-						IDBPermissionDenied: false,
-						loading: false,
-						protocolLog: false,
-						logEntries: [],
-						messages: []
-					});
-					// redirect to login page
-					goto('/login');
+			$socketClient.socket.io.on('error', (error: any) => {
+				if (error.description === 401) {
+					disconnect();
+					console.error(error);
 				}
-				// remove the user and
-				console.error('connection error: ', error);
 			});
 			// (event) handles receiving a new message
-			$socketClient.socket.on('message', (message: IMessage | IInitialMessage) => {
+			$socketClient.socket.on('message', (message: ITextMessage | IECDHMessage) => {
 				if ($socketClient.receiveMessage) {
 					$socketClient.receiveMessage(message);
 				}
 			});
+			// (event) handles performing an action
+			$socketClient.socket.on('action', (data: { action: string }) => {
+				if (data.action === 'logout' && $socketClient.disconnect) {
+					$socketClient.disconnect();
+				}
+			});
+
 			// (event) handles receiving a list of messages that were queued in the server
-			$socketClient.socket.on('queued-messages', (messages: (IMessage | IInitialMessage)[]) => {
+			$socketClient.socket.on('queued-messages', (messages: (ITextMessage | IECDHMessage)[]) => {
 				if ($socketClient.receiveMessage) {
 					for (let message of messages) {
 						$socketClient.receiveMessage(message);
@@ -95,6 +92,17 @@
 	 * A function that disconnects from the socket server and removes all event handlers.
 	 */
 	function disconnect() {
+		globalState.set({
+			currentSession: undefined,
+			IDBPermissionDenied: false,
+			loading: false,
+			protocolLog: false,
+			logEntries: [],
+			messages: [],
+			personalSessions: [],
+			verificationCodes: []
+		});
+
 		if ($socketClient.socket) {
 			$socketClient.socket.disconnect();
 			$socketClient.socket.off('connect');
@@ -102,6 +110,9 @@
 			$socketClient.socket = undefined;
 		}
 		console.log('disconnected from socket server');
+
+		// redirect to login page
+		goto('/login');
 	}
 	$socketClient.disconnect = disconnect;
 

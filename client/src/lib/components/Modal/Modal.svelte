@@ -8,6 +8,8 @@
 
 {#if open}
 	<div class="overlay" transition:fade={{ duration: 100 }}>
-		<slot></slot>
+		<div class="modal">
+			<slot></slot>
+		</div>
 	</div>
 {/if}

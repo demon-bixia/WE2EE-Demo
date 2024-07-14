@@ -1,155 +1,262 @@
 <script lang="ts">
-	import type { KeyPair, ReceivedKeyBundle, SharedSecret } from '$lib/WE2EE/types';
+	import type { DHResult, KeyPair, ReceivedKeyBundle, SharedSecret } from '$lib/WE2EE/types';
 	import type { Writable } from 'svelte/store';
-	import type { IInitialMessage, IMessage, ISocketClient, IStoreData } from '../../../types';
+	import type {
+		IInitialMessage,
+		ITextMessage,
+		ISocketClient,
+		IStoreData,
+		TMessageTypes,
+		IECDHMessage
+	} from '../../../types';
 
 	import Protocol from '$lib/WE2EE';
-	import { bufferToBase64, bufferToString } from '$lib/WE2EE/encoding';
+	import { bufferToBase64 } from '$lib/WE2EE/encoding';
 	import { getContext } from 'svelte';
 
+	// **** Types **** //
+	interface IStoreQueryResult {
+		IK: KeyPair;
+		SSs: SharedSecret[];
+	}
+
+	// **** Variables **** //
 	const globalState = getContext<Writable<IStoreData>>('globalState');
 	const socketClient = getContext<Writable<ISocketClient>>('socketClient');
 	const protocol = getContext<Writable<Protocol>>('protocol');
 	const log = getContext<(logEntry: any) => void>('log');
 
+	// **** Functions **** //
 	/**
-	 * Sends a message to the other user
+	 * Takes a string searches for keys and broadcasts the
+	 * encrypted text message using these keys.
 	 */
 	async function sendMessage(content: string) {
-		if ($globalState && $globalState.user && $socketClient.socket) {
-			const currentDate = Date.now();
-			const to = $globalState.user.username === 'Alice' ? 'Bob' : 'Alice';
+		if (!$globalState || !$globalState.user) {
+			throw new Error('User not authenticated');
+		}
 
-			// Search for your IK and the SS of the user you want to communicate with.
-			const storeQueryResult = await $protocol.store.getKeys<{
-				IK: KeyPair;
-				SSs: SharedSecret[];
-			}>([{ name: 'IK' }, { name: 'SSs', filters: { username: to } }]);
+		if (!$socketClient.socket) {
+			throw new Error('SocketClient is not setup properly');
+		}
 
-			if (
-				storeQueryResult &&
-				storeQueryResult.IK &&
-				storeQueryResult.SSs &&
-				storeQueryResult.SSs.length > 0
-			) {
-				let needForward = true;
-				// If SSs are found the send message using them all.
-				for (let SS of storeQueryResult.SSs) {
-					const IV = $protocol.generateIV().buffer;
-					const encryptedContent = await $protocol.encrypt(SS.SK, IV, content);
-					const message: IMessage = {
-						subject: 'text-message',
-						to: to,
-						from: $globalState.user.username,
-						content: encryptedContent,
-						timestamp: currentDate,
-						IK: bufferToBase64(storeQueryResult.IK.publicKey),
-						iv: bufferToBase64(IV)
-					};
+		const to = $globalState.user.username === 'Alice' ? 'Bob' : 'Alice';
 
-					// Send the message
-					$socketClient.socket.emit(
-						'message',
-						{ receiverId: SS.IK, message: message },
-						async (response: { status: string }) => {
-							if (response.status === 'Ok') {
-								// Forward the messages to this sender's other sessions
-								if (needForward) {
-									// Save the message
-									saveMessage(message, content, currentDate);
-									const forwarded = await forwardMessage(message, content);
-									needForward = forwarded;
-								}
-							}
-						}
+		// Search for your IK and the SS of the user you want to communicate with.
+		const storeQueryResult = await $protocol.store.getKeys<IStoreQueryResult>([
+			{ name: 'IK' },
+			{ name: 'SSs', filters: { username: to } }
+		]);
+
+		const knownSessions = validateQueryResult(storeQueryResult)
+			? getKnownSessions((storeQueryResult as IStoreQueryResult).SSs)
+			: [];
+
+		let saved = false;
+
+		// Send the message using the known keys
+		if (knownSessions.length > 0) {
+			broadcastMessage(
+				'text',
+				to,
+				(storeQueryResult as IStoreQueryResult).SSs,
+				(storeQueryResult as IStoreQueryResult).IK,
+				true,
+				content
+			);
+			saved = true;
+		}
+
+		// Get new sessions
+		$socketClient.socket.emit(
+			'keys:request',
+			{ username: to, knownSessions: knownSessions },
+			async (keyRequestResponse: { status: string; data: ReceivedKeyBundle[] }) => {
+				if (keyRequestResponse.status !== 'Ok' || !keyRequestResponse.data) {
+					throw new Error('Failed to get keys from the server');
+				}
+
+				if (!$socketClient.deriveFromBundles) {
+					throw new Error('SocketClient is not setup properly');
+				}
+
+				if (keyRequestResponse.data.length > 0) {
+					const DHResults = await $socketClient.deriveFromBundles(to, keyRequestResponse.data);
+					await broadcastMessage(
+						'ecdh',
+						to,
+						DHResults,
+						(storeQueryResult as IStoreQueryResult).IK,
+						!saved,
+						content
 					);
 				}
-			} else {
-				// If SK doesn't exist perform ECDH key exchange and send the initial message.
-				//  Request for a key bundle
-				$socketClient.socket.emit(
-					'keys:request',
-					{ username: to, allSessions: false },
-					async (keyRequestResponse: { status: string; data: ReceivedKeyBundle }) => {
-						if (
-							keyRequestResponse.status === 'Ok' &&
-							keyRequestResponse.data &&
-							$globalState.user &&
-							$socketClient.socket
-						) {
-							// Preform a ECDH.
-							const DHResult = await $protocol.deriveFromBundle(keyRequestResponse.data);
-							const SS = {
-								username: to,
-								IK: keyRequestResponse.data.IK,
-								SK: DHResult.SK,
-								AD: DHResult.AD,
-								salt: DHResult.salt
-							};
-
-							// Save the key
-							const SSsQueryResult = await $protocol.store.getKeys<{ SSs: SharedSecret[] }>([
-								{ name: 'SSs' }
-							]);
-							if (SSsQueryResult && SSsQueryResult.SSs && SSsQueryResult.SSs.length > 0) {
-								await $protocol.store.updateKeys({ SSs: [...SSsQueryResult.SSs, SS] });
-							} else {
-								await $protocol.store.updateKeys({ SSs: [SS] });
-							}
-
-							// Encrypt the message
-							const IV = $protocol.generateIV().buffer;
-							const encryptedContent = await $protocol.encrypt(SS.SK, IV, content);
-							const message: IInitialMessage = {
-								subject: 'ecdh-message',
-								to: to,
-								from: $globalState.user.username,
-								content: encryptedContent,
-								timestamp: currentDate,
-								iv: bufferToBase64(IV),
-								salt: bufferToBase64(SS.salt),
-								IK: bufferToBase64(DHResult.IK),
-								EK: bufferToBase64(DHResult.EK),
-								SPK_ID: keyRequestResponse.data.SPK.id,
-								OPK_ID: keyRequestResponse.data.OPK?.id
-							};
-
-							// Send the message
-							$socketClient.socket.emit(
-								'message',
-								{ receiverId: keyRequestResponse.data.IK, message: message },
-								async (messageResponse: { status: string; data: any }) => {
-									if (messageResponse.status === 'Ok') {
-										// Save the message
-										saveMessage(message, content, currentDate);
-										// Forward the message
-										await forwardMessage(message, content);
-										// Log sending the first message.
-										log({
-											title: 'Sent initial message',
-											more: {
-												message: message.content,
-												receiverId: keyRequestResponse.data.IK,
-												EK: bufferToBase64(DHResult.EK),
-												SPK_ID: keyRequestResponse.data.SPK.id,
-												OPK_ID: keyRequestResponse.data.OPK?.id
-											}
-										});
-									}
-								}
-							);
-						}
-					}
-				);
 			}
-		}
+		);
 	}
 	$socketClient.sendMessage = sendMessage;
 
 	/**
+	 * check if the store query result is valid
+	 * @param storeQueryResult
+	 */
+	function validateQueryResult(storeQueryResult: IStoreQueryResult | undefined): boolean {
+		return Boolean(
+			storeQueryResult &&
+				storeQueryResult.IK &&
+				storeQueryResult.SSs &&
+				storeQueryResult.SSs.length > 0
+		);
+	}
+
+	/**
+	 * Broadcasts a message using the provided keys.
+	 */
+	async function broadcastMessage(
+		subject: TMessageTypes,
+		to: string,
+		keys: SharedSecret[] | DHResult[] | (SharedSecret | DHResult)[],
+		IK: KeyPair,
+		save: boolean,
+		content?: string,
+		extraData?: any
+	) {
+		let needFroward = true;
+		let needSave = save;
+		const knownSessions = getKnownSessions(keys);
+
+		keys.forEach(async (value) => {
+			// Check connections
+			if (!$socketClient.socket) {
+				throw new Error('No socket connection');
+			}
+
+			const message = await constructMessage(
+				subject,
+				to,
+				IK,
+				value,
+				knownSessions,
+				content,
+				extraData
+			);
+
+			const receiverID = 'oddIK' in value ? bufferToBase64(value.oddIK) : value.IK;
+
+			// Send the message
+			$socketClient.socket.emit(
+				'message',
+				{ receiverId: receiverID, message: message },
+				async (messageResponse: { status: string; data: any }) => {
+					if (messageResponse.status === 'Ok') {
+						// Forward the messages to this sender's other sessions
+						if (needSave && content) {
+							// Save the message
+							saveMessage(message, content);
+							needSave = false;
+							// Log sending the message.
+							log({
+								title: 'Sent initial message',
+								more: {
+									subject: subject,
+									message: content,
+									receiverId: receiverID
+								}
+							});
+						}
+
+						if (needFroward && content) {
+							const forwarded = await forwardMessage(message, IK, content);
+							needFroward = forwarded;
+						}
+					}
+				}
+			);
+		});
+	}
+	$socketClient.broadcastMessage = broadcastMessage;
+
+	/**
+	 * Returns a list containing the identity keys of all the known sessions.
+	 */
+	function getKnownSessions(keys: DHResult[] | SharedSecret[] | (SharedSecret | DHResult)[]) {
+		return keys.map((value) => ('oddIK' in value ? bufferToBase64(value.oddIK) : value.IK));
+	}
+
+	/**
+	 * Removes unnecessary keys and saves the message.
+	 */
+	function saveMessage(message: ITextMessage | IInitialMessage | IECDHMessage, content: string) {
+		// Save the message
+		const savedMessage = {
+			id: message.id,
+			subject: message.subject,
+			to: message.to,
+			from: message.from,
+			content: content,
+			timestamp: message.timestamp,
+			knownSessions: message.knownSessions
+		};
+		$globalState.messages = [...$globalState.messages, savedMessage];
+	}
+	$socketClient.saveMessage = saveMessage;
+
+	/**
+	 *  Constructs a message based on the parameters provided.
+	 */
+	async function constructMessage(
+		subject: TMessageTypes,
+		to: string,
+		IK: KeyPair,
+		SS: SharedSecret | DHResult,
+		knownSessions: string[],
+		content?: string,
+		extraData?: any
+	): Promise<ITextMessage | IInitialMessage> {
+		if (!$globalState.user) {
+			throw new Error('There is no authenticated user');
+		}
+
+		const currentDate = Date.now();
+		let message: any = {
+			id: window.crypto.randomUUID(),
+			subject: subject,
+			to: to,
+			from: $globalState.user.username,
+			timestamp: currentDate,
+			IK: bufferToBase64(IK.publicKey),
+			knownSessions: knownSessions
+		};
+
+		if (content) {
+			// Encrypt message content
+			const IV = $protocol.generateIV().buffer;
+			const encryptedContent = await $protocol.encrypt(SS.SK, IV, content);
+			message['content'] = encryptedContent;
+			message['iv'] = bufferToBase64(IV);
+		}
+
+		if (subject === 'ecdh') {
+			return {
+				...message,
+				salt: bufferToBase64(SS.salt),
+				EK: bufferToBase64((SS as DHResult).EK),
+				SPK_ID: (SS as DHResult).SPK_ID,
+				OPK_ID: (SS as DHResult).OPK_ID
+			};
+		} else {
+			return { ...message, ...extraData };
+		}
+	}
+
+	/**
 	 * A callback that forwards a message to all the sessions associated with the sender.
 	 */
-	async function forwardMessage(message: IInitialMessage | IMessage, content: string) {
+	async function forwardMessage(
+		message: IInitialMessage | ITextMessage,
+		IK: KeyPair,
+		content: string
+	) {
 		if (!$globalState.user || !$socketClient.socket) {
 			return false;
 		}
@@ -173,17 +280,15 @@
 						return;
 					}
 
-					// Encrypt the message
-					const IV = $protocol.generateIV().buffer;
-					const messageToForward: IMessage = {
-						subject: 'text-message',
-						to: message.to,
-						from: message.from,
-						content: await $protocol.encrypt(SS.SK, IV, content),
-						timestamp: message.timestamp,
-						IK: message.IK,
-						iv: bufferToBase64(IV)
-					};
+					// Construct the forward message
+					const messageToForward = await constructMessage(
+						'forward',
+						message.to,
+						IK,
+						SS,
+						message.knownSessions,
+						content
+					);
 
 					// Send the message
 					$socketClient.socket.emit(
@@ -198,15 +303,6 @@
 									resolve(false);
 									return;
 								}
-								// Log sending a message
-								log({
-									title: 'Sent a text message',
-									more: {
-										to: message.to,
-										from: $globalState.user.username,
-										message: message.content
-									}
-								});
 								resolve(true);
 							} else {
 								resolve(false);
@@ -219,20 +315,5 @@
 
 		// If one message is forwarded successfully then return true
 		return forwardResult.includes(true);
-	}
-
-	/**
-	 * Removes unnecessary keys and saves the message.
-	 */
-	function saveMessage(message: IMessage | IInitialMessage, content: string, currentDate: number) {
-		// Save the message
-		const savedMessage = {
-			subject: message.subject,
-			to: message.to,
-			from: message.from,
-			content: content,
-			timestamp: currentDate
-		};
-		$globalState.messages = [...$globalState.messages, savedMessage];
 	}
 </script>

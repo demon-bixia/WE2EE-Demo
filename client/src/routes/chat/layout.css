@@ -6,7 +6,7 @@
 
 .sidebar {
   height: 100%;
-  min-width: 400px;
+  width: 500px;
   background: #ffffff;
   display: flex;
   flex-direction: column;

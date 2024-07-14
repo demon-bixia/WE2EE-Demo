@@ -1,0 +1,11 @@
+.allow-indexedDB-dialog {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.dialog-details {
+  margin-top: 8px;
+  text-align: center;
+}

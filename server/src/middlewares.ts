@@ -1,8 +1,10 @@
 /**
  * json web token middleware
  */
-import type { IReq, IRes } from '@src/types/express/misc';
+import type { IncomingMessage, ServerResponse } from 'node:http';
+
 import { verifyToken } from '@src/utils';
+import url from 'node:url';
 
 
 // **** Functions **** //
@@ -10,8 +12,9 @@ import { verifyToken } from '@src/utils';
 /**
  * Authenticates jwt in websocket server 
  */
-export async function WSAuthenticateToken(req: IReq, _: IRes, next: Function) {
-  const isHandshake = req._query.sid === undefined; // ensure only applied to the first session
+export async function WSAuthenticateToken(req: IncomingMessage, res: ServerResponse, next: Function) {
+  const queryData = url.parse(req.url || '', true).query;
+  const isHandshake = queryData.sid === undefined; // Ensure only applied to the first session
 
   if (!isHandshake) {
     return next();
@@ -20,18 +23,27 @@ export async function WSAuthenticateToken(req: IReq, _: IRes, next: Function) {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
 
-  // check if token exists
+  // Check if token exists
+
   if (!token) {
-    return next(new Error("No token provided"));
+    res.writeHead(401, { 'Content-Type': 'application/json' });
+    res.write(JSON.stringify({ message: 'No token provided' }));
+    res.end();
+    return;
   }
 
-  // verify token
+  // Verify token
   try {
     const decoded = await verifyToken(token);
-    if (!decoded) return next(new Error("invalid token"));
-    req.user = decoded;
+    if (!decoded) {
+      res.writeHead(401, { 'Content-Type': 'application/json' });
+      res.write(JSON.stringify({ message: 'invalid token' }));
+      res.end();
+      return;
+    }
+    (req as any).user = decoded;
     next();
   } catch (error) {
-    return next(new Error("invalid token"));
+    //return res.status(HttpStatusCodes.UNAUTHORIZED).json({ message: 'Invalid token' }).end();
   }
 }

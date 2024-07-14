@@ -67,14 +67,13 @@ class KeyStore {
       if (!this.DB) { return reject(new IndexedDBConnectionError()); }
 
       // Check if there are keys
-      const getRequest = (this.DB as IDBDatabase)
+      const getRequest = this.DB
         .transaction(['keys'], 'readwrite')
         .objectStore('keys')
         .get(this.username);
 
       getRequest.onsuccess = () => {
-        let data = getRequest.result;
-        if (!data) {
+        if (!getRequest.result) {
           const addRequest = (this.DB as IDBDatabase)
             .transaction(['keys'], 'readwrite')
             .objectStore('keys')
@@ -83,7 +82,7 @@ class KeyStore {
           addRequest.onsuccess = () => { resolve(addRequest.result) };
           addRequest.onerror = () => { reject(new IndexedDBTransactionError("unable to create initial object")); };
         }
-        resolve(data);
+        resolve(getRequest.result);
       };
     });
   }
@@ -92,8 +91,8 @@ class KeyStore {
    * Gets keys from the keystore
    * passing * will return all the keys.
    */
-  getKeys<T>(query: '*' | KeyStoreQuery[]) {
-    return new Promise<T | undefined>((resolve, reject) => {
+  getKeys<Type>(query: '*' | KeyStoreQuery[]) {
+    return new Promise<Type | undefined>((resolve, reject) => {
       // If database not connected
       if (!this.DB) reject(new IndexedDBConnectionError());
       // Fetch keys from the database
@@ -109,7 +108,7 @@ class KeyStore {
             ? request.result.keys
             : this.searchKeys(query, request.result.keys);
           // Resolve with the keys.
-          resolve(<T>filteredResult);
+          resolve(<Type>filteredResult);
         } else {
           resolve(undefined);
         }
@@ -119,7 +118,7 @@ class KeyStore {
         reject(new IndexedDBTransactionError("Unable to get keys from keystore"));
       };
     });
-  };
+  }
 
   /**
    * Searches the keys returned from 
@@ -135,7 +134,7 @@ class KeyStore {
             // Loop all the filters and apply them
             let filterResults: SignedKeyPair[] | OPK[] | SharedSecret[] = keyValue;
             Object.entries(query.filters).forEach(([filterName, filterValue]) => {
-              filterResults = this.applyFilters(filterResults, filterName, filterValue);
+              filterResults = this.applyFilter(filterResults, filterName, filterValue);
             });
             searchResults[keyName] = filterResults;
           }
@@ -153,7 +152,7 @@ class KeyStore {
    * Takes an array of keys, a filterName and a filterValue 
    * and returns the keys that match the filer
    */
-  applyFilters(
+  applyFilter(
     keyArray: any[],
     filterName: string,
     filterValue: string
@@ -163,8 +162,8 @@ class KeyStore {
       const timestamp_92_hours_ago = Date.now() - 1000 * 60 * 60 * 92;
       if (filterValue === 'newest-key') {
         const timestampArray = keyArray.map((key) => key.timestamp);
-        const smallestTimestamp = Math.max(...timestampArray);
-        return keyArray.filter((key) => key.timestamp === smallestTimestamp);
+        const newestTimestamp = Math.max(...timestampArray);
+        return keyArray.filter((key) => key.timestamp === newestTimestamp);
       }
       else if (filterValue === 'more-than-92-hours') {
         return keyArray.filter((key) => key.timestamp <= timestamp_92_hours_ago);
@@ -213,33 +212,37 @@ class KeyStore {
   updateKeys(input: KeyStoreKeys) {
     return new Promise(async (resolve, reject) => {
       // If database not connected
-      if (!this.DB) reject(new IndexedDBConnectionError());
+      if (!this.DB) return reject(new IndexedDBConnectionError());
       // Validate input
       if (!this.isValid(input)) {
         reject(new IndexedDBInvalidInput("Input is missing some properties"));
       }
-      // Get the old keys form key store
-      const objectStore = (this.DB as IDBDatabase)
+
+      // Start a transaction
+      const objectStore = this.DB
         .transaction(['keys'], 'readwrite')
         .objectStore('keys')
-      // Get the values you want to update.
-      const request = objectStore.get(this.username);
+
+      // Get the old keys from the key store
+      const getRequest = objectStore.get(this.username);
+
       // Update the keys
-      request.onsuccess = async () => {
-        let data = request.result;
+      getRequest.onsuccess = async () => {
+        let data = getRequest.result;
         data['keys'] = data.keys
           ? { ...data.keys, ...input }
           : input;
-        const requestUpdate = objectStore.put(data);
+
+        const putRequest = objectStore.put(data);
         // Resolve with updated data
-        requestUpdate.onsuccess = () => {
+        putRequest.onsuccess = () => {
           resolve(input);
         }
-        requestUpdate.onerror = () => {
+        putRequest.onerror = () => {
           reject(new IndexedDBInvalidInput('Unable to update values'));
         }
       };
-      request.onerror = () => {
+      getRequest.onerror = () => {
         reject(new IndexedDBNotFound());
       };
     });

@@ -4,7 +4,7 @@ import logger from "jet-logger";
 /**
  *  Logs connection errors
  */
-async function onConnectionError(error: Error) {
+function onConnectionError(error: Error) {
   logger.err(error.message);
 }
 

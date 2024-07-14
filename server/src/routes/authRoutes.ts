@@ -8,8 +8,6 @@ import { UserModel } from '@src/models';
 import { generateAccessToken } from '@src/utils';
 
 
-
-
 // **** Functions **** //
 
 /**
@@ -18,7 +16,7 @@ import { generateAccessToken } from '@src/utils';
 async function getToken(req: IReq, res: IRes) {
   // validate data
   if (!req.body['username']) {
-    return res.status(HttpStatusCodes.BAD_REQUEST).json({ message: 'Missing username field' }).end();
+    return res.status(HttpStatusCodes.BAD_REQUEST).json({ message: 'Missing some required fields' }).end();
   }
 
   // find user with username using mongodb model.

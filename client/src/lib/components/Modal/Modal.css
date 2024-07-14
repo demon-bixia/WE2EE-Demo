@@ -9,3 +9,15 @@
   align-items: center;
   z-index: 1000;
 }
+
+.modal {
+  padding: 1.5rem 1rem;
+  background: #ffffff;
+  border-radius: 0.75rem;
+  width: 20.75rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 1.5rem;
+}

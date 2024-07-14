@@ -11,7 +11,9 @@ import type {
   PreparedOPK,
   PreparedSignedKeyPair,
   ReceivedKeyBundle,
-  SignedKeyPair
+  SignedKeyPair,
+  DHResult,
+  KeyStoreKeys
 } from './types';
 
 import { base64ToBuffer, bufferToBase64, bufferToString, stringToBuffer } from './encoding';
@@ -54,7 +56,7 @@ class Protocol {
 
   /** 
    * Import the key as an ECDSA key 
-   * */
+   */
   async importAsECDSA(key: CryptoKey) {
     const exportedKey = await window.crypto.subtle.exportKey("pkcs8", key);
     return await window.crypto.subtle.importKey("pkcs8", exportedKey, { name: 'ECDSA', namedCurve: 'P-384' }, false, ['sign']);
@@ -66,8 +68,18 @@ class Protocol {
   async sign(privateKey: CryptoKey, data: ArrayBuffer) {
     // Import the ECDH key as an ECDSA
     const signerKey = await this.importAsECDSA(privateKey);
-    //Sign the message with private key
+    // Sign the message with private key
     return await window.crypto.subtle.sign({ name: 'ECDSA', hash: { name: 'SHA-384' } }, signerKey, data);
+  }
+
+  /**
+   * Creates a signature of the IK private key using 
+   * the IK public key as the signed content.
+   */
+  async createIKSignature() {
+    const storeQueryResult = await this.store.getKeys<KeyStoreKeys>([{ name: 'IK' }]);
+    if (!storeQueryResult || !storeQueryResult.IK) { throw new Error('IK not found') }
+    return await this.sign(storeQueryResult.IK.privateKey, storeQueryResult.IK.publicKey);
   }
 
   /**
@@ -223,7 +235,7 @@ class Protocol {
    * Preforms an extended ECDH key exchange.
    * this is the part where the user receive a key bundle from the server.
    */
-  async deriveFromBundle(keyBundle: ReceivedKeyBundle) {
+  async deriveFromBundle(keyBundle: ReceivedKeyBundle): Promise<DHResult> {
     // Get personal IK from store
     const IKQueryResult = await this.store.getKeys<{ IK: KeyPair }>([{ name: 'IK' }]);
     if (!IKQueryResult || !IKQueryResult.IK.privateKey) { throw new IndexedDBNotFound() }
@@ -296,6 +308,8 @@ class Protocol {
       salt,
       AD,
       EK: EK.publicKey,
+      SPK_ID: keyBundle.SPK.id,
+      OPK_ID: keyBundle.OPK ? keyBundle.OPK.id : undefined,
     };
   }
 
@@ -303,7 +317,7 @@ class Protocol {
    * Performs an extended ECDH key exchange.
    * this is the part where the user receive the initial message.
    */
-  async deriveFromInitialMessage(messageKeys: InitialMessageKeys) {
+  async deriveFromInitialMessage(messageKeys: InitialMessageKeys): Promise<DHResult> {
     // Get personal IK from store
     const IKQueryResult = await this.store.getKeys<{ IK: KeyPair }>([{ name: 'IK' }]);
     if (!IKQueryResult || !IKQueryResult.IK.privateKey) { throw new IndexedDBNotFound(); }
@@ -374,10 +388,14 @@ class Protocol {
     );
 
     return {
+      IK: IKQueryResult.IK.publicKey,
       oddIK: base64ToBuffer(messageKeys.IK),
+      SK,
       salt: base64ToBuffer(messageKeys.salt),
-      SK: SK,
-      AD
+      AD,
+      EK: base64ToBuffer(messageKeys.EK),
+      SPK_ID: messageKeys.SPK_ID,
+      OPK_ID: messageKeys.OPK_ID,
     };
   }
 

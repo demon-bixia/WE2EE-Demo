@@ -16,15 +16,15 @@
 
 	let copyButtonsIndexes: number[] = [];
 	// (event) when a value is copied indicate that it's copied
-	function handleCopyValue(copyButtonIndex: number) {
-		if (!copyButtonsIndexes.includes(copyButtonIndex)) {
-			copyButtonsIndexes = [...copyButtonsIndexes, copyButtonIndex];
+	function handleCopyValue(buttonIndex: number, copyValue: string | number) {
+		if (!copyButtonsIndexes.includes(buttonIndex)) {
+			copyButtonsIndexes = [...copyButtonsIndexes, buttonIndex];
 		}
 
-		console.log(copyButtonsIndexes);
+		navigator.clipboard.writeText(String(copyValue));
 
 		setTimeout(() => {
-			let indexOfCopyIndex = copyButtonsIndexes.indexOf(copyButtonIndex);
+			let indexOfCopyIndex = copyButtonsIndexes.indexOf(buttonIndex);
 			copyButtonsIndexes = copyButtonsIndexes.splice(indexOfCopyIndex, indexOfCopyIndex);
 		}, 1000);
 	}
@@ -60,8 +60,8 @@
 				{#each Object.entries(entry.more) as [key, value], index}
 					<div class="detail">
 						<p class="key body-1">{key}</p>
-						<p class="value body-1">{value}</p>
-						<button class="copy-button" on:click={() => handleCopyValue(index)}>
+						<p class="value body-1">{typeof value === 'number' ? value : value.slice(0, 10)}</p>
+						<button class="copy-button" on:click={() => handleCopyValue(index, value)}>
 							{#if copyButtonsIndexes.includes(index)}
 								copied!
 							{:else}

@@ -9,23 +9,18 @@
 	import KeysManager from '$lib/components/SocketClient/KeysManager.svelte';
 	import Receiver from '$lib/components/SocketClient/Receiver.svelte';
 	import Sender from '$lib/components/SocketClient/Sender.svelte';
+	import KeysDeriver from '$lib/components/SocketClient/KeysDeriver.svelte';
 
 	const protocol = writable<Protocol>(undefined);
 	setContext('protocol', protocol);
 
-	const socketClient = writable<ISocketClient>({
-		socket: undefined,
-		connect: undefined,
-		disconnect: undefined,
-		setupKeys: undefined,
-		receiveMessage: undefined,
-		sendMessage: undefined
-	});
+	const socketClient = writable<ISocketClient>({});
 	setContext('socketClient', socketClient);
 </script>
 
 <Sender />
 <Receiver />
+<KeysDeriver />
 <KeysManager />
 <ConnectionManager />
 <slot></slot>

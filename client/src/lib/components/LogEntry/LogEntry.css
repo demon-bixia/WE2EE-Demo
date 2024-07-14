@@ -32,6 +32,7 @@
   min-width: 1rem;
   max-width: 1rem;
   display: flex;
+  align-items: center;
 }
 
 .circle {
@@ -48,8 +49,8 @@
   position: absolute;
   height: calc(100% - 1rem);
   width: 0.0625rem;
-  top: 1rem;
-  left: 3.8438rem;
+  top: 1.3rem;
+  left: 3.85rem;
   background-color: rgba(0, 0, 0, 0.2);
 }
 
@@ -58,6 +59,9 @@
   flex-basis: 75%;
   line-height: normal;
   min-width: 0.0625rem;
+  display: flex;
+  align-items: center;
+  margin: 0;
   flex: 1;
 }
 

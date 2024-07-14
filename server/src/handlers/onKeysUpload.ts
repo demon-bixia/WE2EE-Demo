@@ -37,6 +37,15 @@ async function onKeysUpload(payload: { newSession: boolean, keyBundle: IKeyBundl
   }
 
   if (payload.newSession) {
+    // Check if already has sessions
+    if (socket.data.sessionId) {
+      const message = "Session is already created";
+      logger.err(message);
+      return callbackResponse(callback, {
+        status: 'Bad Request',
+        message
+      });
+    }
     // Check for duplicates
     if (hasDuplicateKeys(payload.keyBundle, user.sessions)) {
       const message = "Bundle contains duplicate keys";
@@ -54,7 +63,8 @@ async function onKeysUpload(payload: { newSession: boolean, keyBundle: IKeyBundl
     user.sessions.push(session);
     // Associate the new session with this socket connection
     socket.data.sessionId = session.IK;
-    logger.info(`Socket width #id: ${socket.id} associated with session #id ${session.IK.substring(0, 10)}`);
+    socket.data.username = user.username;
+    logger.info(`Socket width #id: ${socket.id} associated with session #id ${session.IK.slice(-10)}`);
   } else {
     // Check if the connection is associated with a session.
     if (!socket.data.sessionId) {
@@ -81,8 +91,7 @@ async function onKeysUpload(payload: { newSession: boolean, keyBundle: IKeyBundl
   const newUser = await user.save();
   if ('username' in newUser) {
     return callback({ status: 'Ok' });
-  }
-  else {
+  } else {
     const message = "Update failed";
     logger.err(message);
     return callbackResponse(callback, { status: 'Bad Request', message });

@@ -15,7 +15,9 @@
 		loading: true,
 		protocolLog: true,
 		logEntries: [],
-		messages: []
+		messages: [],
+		personalSessions: [],
+		verificationCodes: []
 	});
 	setContext('globalState', globalState);
 

@@ -18,8 +18,10 @@ export function generateAccessToken(user: IUser) {
  * test if the token is valid
  utils*/
 export function verifyToken(token: string) {
-  return new Promise<{ username: string } | undefined>((resolve, reject) => jwt.verify(token, envVars.JWT.Secret,
-    (error: VerifyErrors | null, decoded: string | undefined | JwtPayload) => error ? reject(undefined) : resolve((decoded as { username: string }))));
+  return new Promise<IUser | undefined>((resolve, reject) => jwt.verify(
+    token, envVars.JWT.Secret,
+    (error: VerifyErrors | null, decoded: string | undefined | JwtPayload) => error ? reject(undefined) : resolve((decoded as IUser))
+  ));
 }
 
 /**

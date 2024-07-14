@@ -1,8 +1,4 @@
-import type {
-  IInitialMessage,
-  IMessage,
-  ISessionSocket
-} from "@src/types/types";
+import type { IInitialMessage, IMessage, ISessionSocket } from "@src/types/types";
 import type { Server } from "socket.io";
 
 import logger from "jet-logger";
@@ -22,6 +18,19 @@ async function onMessage(payload: { receiverId: string, message: IMessage | IIni
     const message = `onMessage: Socket with #id ${socket.id} not associated with a session`;
     logger.err(message);
     return callbackResponse(callback, { status: 'Unauthorized', message })
+  }
+
+  // Check if the receiverId is in the blocklist
+  const blocklist = await redisClient.get(`blocklist`);
+  const parsedBlocklist = JSON.parse(blocklist || '{"sessions": []}');
+  if (parsedBlocklist.sessions.includes(payload.receiverId)) {
+    const message = "onMessage: The receiving session is blocked";
+    logger.err(message);
+    return callbackResponse(callback, {
+      status: "Unauthorized",
+      message,
+      action: 'delete'
+    })
   }
 
   // Check if the message provided is valid
