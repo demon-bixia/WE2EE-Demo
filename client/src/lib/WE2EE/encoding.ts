@@ -32,19 +32,19 @@ export function stringToBuffer(str: string) {
  * @param {ArrayBuffer} data 
  * @returns {String}
  */
-export function bufferToBase64(buffers: ArrayBuffer) {
-  const str = bufferToString(buffers);
+export function bufferToBase64(buffer: ArrayBuffer) {
+  const str = bufferToString(buffer);
   return window.btoa(str);
 }
 
 /**
  * converts an array buffer into a string
- * @param buffers {ArrayBuffer}
+ * @param buffer {ArrayBuffer}
  * @returns {String}
  */
-export function bufferToString(buffers: ArrayBuffer) {
+export function bufferToString(buffer: ArrayBuffer) {
   let str = '';
-  let bytes = new Uint8Array(buffers);
+  let bytes = new Uint8Array(buffer);
   let len = bytes.byteLength;
   for (let i = 0; i < len; i++) {
     str += String.fromCharCode(bytes[i]);
@@ -54,10 +54,14 @@ export function bufferToString(buffers: ArrayBuffer) {
 
 /**
  * Converts an array buffer into an integer
- * @param arrayBuffer 
+ * @param buffer 
  * @returns {int}
  */
-export function bufferToInt(arrayBuffer: ArrayBuffer) {
-  const dv = new DataView(arrayBuffer, 0);
-  return dv.getInt16(0, true);
+export function bufferToDecimalArray(buffer: ArrayBuffer) {
+  const dv = new DataView(buffer, 0);
+
+  let values = [];
+  for (let n = 0; n < buffer.byteLength - 2; n++) { values.push(dv.getInt16(n, true)) }
+
+  return values;
 }

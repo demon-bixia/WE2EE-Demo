@@ -5,7 +5,7 @@
 
 	import Protocol from '$lib/WE2EE';
 	import { getContext } from 'svelte';
-	import { bufferToInt } from '$lib/WE2EE/encoding';
+	import { bufferToDecimalArray } from '$lib/WE2EE/encoding';
 
 	const globalState = getContext<Writable<IStoreData>>('globalState');
 	const socketClient = getContext<Writable<ISocketClient>>('socketClient');
@@ -101,12 +101,15 @@
 		if (codesIndex !== -1) {
 			$globalState.verificationCodes[codesIndex] = {
 				username: SS.username,
-				codes: [...$globalState.verificationCodes[codesIndex].codes, String(bufferToInt(SS.AD))]
+				codes: [
+					...$globalState.verificationCodes[codesIndex].codes,
+					bufferToDecimalArray(SS.AD).slice(-20, -9).join(' ')
+				]
 			};
 		} else {
 			$globalState.verificationCodes.push({
 				username: SS.username,
-				codes: [String(bufferToInt(SS.AD))]
+				codes: [bufferToDecimalArray(SS.AD).slice(-20, -9).join(' ')]
 			});
 		}
 	}
