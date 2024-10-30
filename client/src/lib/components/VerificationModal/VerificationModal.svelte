@@ -50,6 +50,15 @@
 			verified = 'Empty';
 		}
 	}
+
+	// When the $globalState.verification codes value changes update the codes.
+	globalState.subscribe(async (value: IStoreData) => {
+		if (value.user && $globalState.verificationCodes) {
+			verificationCodes = $globalState.verificationCodes.find(
+				(codes) => codes.username === username
+			);
+		}
+	});
 </script>
 
 <Modal open={openVerificationModal}>

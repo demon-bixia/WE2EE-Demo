@@ -1,36 +1,67 @@
 <script lang="ts">
 	import type { IStoreData, ISocketClient } from '../../../types';
 	import type { Writable } from 'svelte/store';
-	import type Protocol from '$lib/WE2EE';
 
+	import Protocol from '$lib/WE2EE';
 	import { getContext } from 'svelte';
 
 	import { ArrowLongDown, ArrowLongUp, Icon, NoSymbol } from 'svelte-hero-icons';
 
 	import './page.css';
-	import { bufferToBase64 } from '$lib/WE2EE/encoding';
+	import { base64ToBuffer, bufferToBase64, stringToBuffer } from '$lib/WE2EE/encoding';
+	import type { KeyPair } from '$lib/WE2EE/types';
 
 	const globalState = getContext<Writable<IStoreData>>('globalState');
 	const socketClient = getContext<Writable<ISocketClient>>('socketClient');
 	const protocol = getContext<Writable<Protocol>>('protocol');
+	const log = getContext<(logEntry: any) => void>('log');
 
 	// (event) sends a "sessions:permissionsChange" message
-	function handlePermissionsChange(sessionId: string, main: boolean) {
+	async function handlePermissionsChange(sessionId: string, main: boolean) {
 		if (!$socketClient.socket) {
 			throw new Error('There is no socket connection');
 		}
 
+		// Search for your SIK.
+		const storeQueryResult = await $protocol.store.getKeys<{ SIK: KeyPair }>([{ name: 'SIK' }]);
+		if (!storeQueryResult || !storeQueryResult.SIK) {
+			throw new Error('Keys not found');
+		}
+		// Create a signature
+		const encodedMessage = stringToBuffer(JSON.stringify({ sessionId, main }));
+		const hashedMessage = await $protocol.hash(encodedMessage);
+		const signature = await $protocol.sign(storeQueryResult.SIK.privateKey, hashedMessage);
+
 		$socketClient.socket.emit(
 			'sessions:permissionsChange',
-			{ sessionId, main },
-			(response: { status: string }) => {
+			{ signature: bufferToBase64(signature), sessionId, main },
+			(response: { status: string; message: string }) => {
 				if (response.status !== 'Ok') {
+					// log permission change failure
+					log({
+						title: 'Permission change failure',
+						more: {
+							sessionId: { value: sessionId, preview: 'end' },
+							admin: { value: String(main), preview: 'start' },
+							reason: { value: response.message, preview: 'start' }
+						}
+					});
 					throw new Error('Failed to change permissions of session');
 				}
+
 				if (!$socketClient.getPersonalSessions) {
 					throw new Error('SocketClient is not setup properly');
 				}
+
 				$socketClient.getPersonalSessions();
+
+				log({
+					title: 'Session permission changed',
+					more: {
+						sessionId: { value: sessionId, preview: 'end' },
+						admin: { value: String(main), preview: 'start' }
+					}
+				});
 			}
 		);
 	}
@@ -41,19 +72,42 @@
 			throw new Error('There is no socket connection');
 		}
 
-		const signature = await $protocol.createIKSignature();
+		// Search for your SIK.
+		const storeQueryResult = await $protocol.store.getKeys<{ SIK: KeyPair }>([{ name: 'SIK' }]);
+		if (!storeQueryResult || !storeQueryResult.SIK) {
+			throw new Error('Keys not found');
+		}
+		// Create a signature
+		const hashedSessionId = await $protocol.hash(base64ToBuffer(sessionId));
+		const signature = await $protocol.sign(storeQueryResult.SIK.privateKey, hashedSessionId);
 
 		$socketClient.socket.emit(
 			'sessions:block',
 			{ signature: bufferToBase64(signature), sessionId },
-			(response: { status: string }) => {
+			(response: { status: string; message: string }) => {
 				if (response.status !== 'Ok') {
+					log({
+						title: 'Failed to block session',
+						more: {
+							sessionId: { value: sessionId, preview: 'end' },
+							reason: { value: response.message, preview: 'start' }
+						}
+					});
 					throw new Error('Failed to block session');
 				}
+
 				if (!$socketClient.getPersonalSessions) {
 					throw new Error('SocketClient is not setup properly');
 				}
+
 				$socketClient.getPersonalSessions();
+
+				log({
+					title: 'Session blocked',
+					more: {
+						sessionId: { value: sessionId, preview: 'end' }
+					}
+				});
 			}
 		);
 	}

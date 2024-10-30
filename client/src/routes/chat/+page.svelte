@@ -8,7 +8,7 @@
 	import VerificationModal from '$lib/components/VerificationModal/VerificationModal.svelte';
 	import { EllipsisHorizontal, Icon, PaperAirplane } from 'svelte-hero-icons';
 
-	import { getContext } from 'svelte';
+	import { getContext, onMount, onDestroy } from 'svelte';
 
 	import Alice from '../../assets/vectors/avatars/round/alice-round.svg';
 	import Bob from '../../assets/vectors/avatars/round/bob-round.svg';
@@ -68,6 +68,34 @@
 	function handleOpenProtocolLog() {
 		$globalState.protocolLog = true;
 	}
+
+	let online = false;
+	let interval: any = null;
+	function checkOnline() {
+		if ($socketClient.socket && $globalState.user) {
+			$socketClient.socket.emit(
+				'sessions:hasActiveSession',
+				{
+					username: $globalState.user.username === 'Alice' ? 'Bob' : 'Alice'
+				},
+				(response: { status: string; hasActiveSession: boolean }) => {
+					if (response.status === 'Ok' && response.hasActiveSession) {
+						online = true;
+					} else {
+						online = false;
+					}
+				}
+			);
+		}
+	}
+
+	onMount(() => {
+		interval = setInterval(checkOnline, 3000);
+	});
+
+	onDestroy(() => {
+		if (interval) clearInterval(interval);
+	});
 </script>
 
 {#if $globalState.user}
@@ -82,7 +110,7 @@
 				/>
 				<div>
 					<p class="body-1 name">{$globalState.user.username === 'Alice' ? 'Bob' : 'Alice'}</p>
-					<p class="body-1 status" class:online={true}>Online</p>
+					<p class="body-1 status" class:online>{online ? 'online' : 'offline'}</p>
 				</div>
 			</div>
 			<div class="dropdown-menu-wrapper">
@@ -117,6 +145,7 @@
 		<div class="middle">
 			{#each $globalState.messages as message}
 				<div
+					id={message.id}
 					class="message"
 					class:self={$globalState?.user && message.from === $globalState?.user.username}
 				>
@@ -134,7 +163,7 @@
 				{handleDetectBlur}
 				placeholderText="Message..."
 			/>
-			<button on:click={handleSendMessage} class="send-button">
+			<button on:click={handleSendMessage} class="send-button" disabled={!$globalState.canSend}>
 				Send
 				<Icon style="color:#ffffff;" src={PaperAirplane} solid size="24" />
 			</button>

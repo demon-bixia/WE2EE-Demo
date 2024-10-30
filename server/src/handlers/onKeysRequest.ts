@@ -42,6 +42,7 @@ async function onKeysRequest(payload: { username: string; knownSessions?: string
     if (session.IK !== socket.data.sessionId) {
       const keyBundle = {
         IK: session.IK,
+        SIK: session.SIK,
         SPK: session.SPK,
         OPK: session.OPKs.length > 0 ? session.OPKs[0] : undefined,
       };

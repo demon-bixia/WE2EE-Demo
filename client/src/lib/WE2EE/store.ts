@@ -200,7 +200,7 @@ class KeyStore {
    * check if the input is of type KeyStoreInput
    */
   isValid(input: KeyStoreKeys) {
-    if (!(input.IK || input.SPKs || input.OPKs || input.SSs)) {
+    if (!(input.IK || input.SIK || input.SPKs || input.OPKs || input.SSs)) {
       return false;
     }
     return true;

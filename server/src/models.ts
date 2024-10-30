@@ -14,6 +14,7 @@ const keyWithIdSchema = new Schema<IKeyWithId>({
 // keys tied to a session
 const sessionSchema = new Schema<ISession>({
   IK: String,
+  SIK: String,
   SPK: keyWithIdSchema,
   OPKs: [keyWithIdSchema],
   main: Boolean,

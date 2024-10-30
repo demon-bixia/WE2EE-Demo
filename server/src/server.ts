@@ -6,21 +6,20 @@ import cors from "cors";
 import express, { NextFunction, Request, Response } from "express";
 import helmet from "helmet";
 import { createServer } from "http";
-import logger from 'jet-logger';
+import logger from "jet-logger";
 import morgan from "morgan";
 import { Server } from "socket.io";
 
 import Paths from "@src/constants/Paths";
 import BaseRouter from "@src/routes/router";
 
-import EnvVars from '@src/constants/EnvVars';
+import EnvVars from "@src/constants/EnvVars";
 import HttpStatusCodes from "@src/constants/HttpStatusCodes";
 import { NodeEnvs } from "@src/constants/misc";
 import { RouteError } from "@src/errors";
 
 import onConnection from "@src/handlers/onConnection";
 import { WSAuthenticateToken } from "@src/middlewares";
-
 
 // **** Setup **** //
 
@@ -41,10 +40,13 @@ if (EnvVars.NodeEnv === NodeEnvs.Production.valueOf()) {
 }
 
 // CORS middleware
-app.use(cors({
-  origin: EnvVars.CORS.AllowOrigin,
-  optionsSuccessStatus: EnvVars.CORS.OptionsSuccessStatus,
-}));
+app.use(
+  cors({
+    origin: EnvVars.CORS.AllowOrigin,
+    methods: ["GET", "POST"],
+    optionsSuccessStatus: EnvVars.CORS.OptionsSuccessStatus,
+  })
+);
 
 // Websocket server
 const server = createServer(app);
@@ -53,13 +55,13 @@ export const io = new Server(server, {
   cors: {
     origin: EnvVars.CORS.AllowOrigin,
     optionsSuccessStatus: EnvVars.CORS.OptionsSuccessStatus,
-  }
+  },
 });
 // Share user context with socket.io server
 io.engine.use(WSAuthenticateToken);
-// Add websocket event handlers
-io.on("connection", (socket) => onConnection(io, (socket as ISessionSocket)));
 
+// Add websocket event handlers
+io.on("connection", (socket) => onConnection(io, socket as ISessionSocket));
 
 // **** Routes **** //
 
@@ -72,7 +74,7 @@ app.use(
     _: Request,
     res: Response,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    next: NextFunction,
+    next: NextFunction
   ) => {
     if (EnvVars.NodeEnv !== NodeEnvs.Test.valueOf()) {
       logger.err(err, true);
@@ -82,10 +84,9 @@ app.use(
       status = err.status;
     }
     return res.status(status).json({ error: err.message });
-  },
+  }
 );
-
 
 // **** Default export  **** //
 
-export default server
+export default server;

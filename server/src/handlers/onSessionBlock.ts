@@ -8,55 +8,96 @@ import { UserModel } from "@src/models";
 import { callbackResponse } from "@src/utils";
 import { validSession } from "@src/validators";
 
-
 /**
  * Adds a session the block list.
  */
-async function onSessionBlock(payload: { signature: string; sessionId: string; }, io: Server, socket: ISessionSocket, callback: any) {
+async function onSessionBlock(
+  payload: { signature: string; sessionId: string },
+  io: Server,
+  socket: ISessionSocket,
+  callback: any
+) {
   // Get the request user
-  const user = await UserModel.findOne({ username: socket.request.user.username });
+  const user = await UserModel.findOne({
+    username: socket.request.user.username,
+  });
   if (!user) {
-    const message = 'onSessionBlock: User not found';
+    const message = "onSessionBlock: User not found";
     logger.err(message);
-    return callbackResponse(callback, { status: 'Not Found', message });
+    return callbackResponse(callback, { status: "Not Found", message });
   }
 
   // Get the associated session form the database
-  const associatedSession = user.sessions.find(session => session.IK === socket.data.sessionId);
+  const associatedSession = user.sessions.find(
+    (session) => session.IK === socket.data.sessionId
+  );
   if (!associatedSession || !validSession(associatedSession)) {
-    const message = 'onSessionBlock: The associated session is not a valid session';
+    const message =
+      "onSessionBlock: The associated session is not a valid session";
     logger.err(message);
-    return callbackResponse(callback, { status: 'Not Found', message });
+    return callbackResponse(callback, { status: "Not Found", message });
   }
 
   // Check if the associated session is a main session
   if (!associatedSession.main) {
-    const message = 'onSessionBlock: Permissions can only be changed from the main session';
+    const message =
+      "onSessionBlock: Permissions can only be changed from the main session";
     logger.err(message);
-    return callbackResponse(callback, { status: 'Unauthorized', message });
+    return callbackResponse(callback, { status: "Unauthorized", message });
+  }
+
+  // Verify the signature of the main session
+  const encodedSessionId = Buffer.from(
+    JSON.stringify(payload.sessionId),
+    "base64"
+  );
+  const hashedSessionId = await crypto.subtle.digest(
+    "SHA-256",
+    encodedSessionId
+  );
+  const importedSIK = await crypto.subtle.importKey(
+    "spki",
+    Buffer.from(associatedSession.SIK, "base64"),
+    { name: "ECDSA", namedCurve: "P-256" },
+    false,
+    ["verify"]
+  );
+  const valid = await crypto.subtle.verify(
+    { name: "ECDSA", hash: { name: "SHA-256" } },
+    importedSIK,
+    Buffer.from(payload.signature, "base64"),
+    hashedSessionId
+  );
+  if (!valid) {
+    const message = "onBlockSession: Invalid main session signature";
+    logger.err(message);
+    return callbackResponse(callback, { status: "Unauthorized", message });
   }
 
   // Check if the session to be blocked is the associated session
   if (associatedSession.IK === payload.sessionId) {
-    const message = 'onSessionBlock: You can\'t block yourself';
+    const message = "onSessionBlock: You can't block yourself";
     logger.err(message);
-    return callbackResponse(callback, { status: 'Bad Request', message });
+    return callbackResponse(callback, { status: "Bad Request", message });
   }
 
   // Get the session to be blocked
-  const blockedSessionIndex = user.sessions.findIndex((session) => session.IK === payload.sessionId);
+  const blockedSessionIndex = user.sessions.findIndex(
+    (session) => session.IK === payload.sessionId
+  );
   if (blockedSessionIndex === -1) {
-    const message = 'onSessionBlock: the session to be blocked does not exist';
+    const message = "onSessionBlock: the session to be blocked does not exist";
     logger.err(message);
-    return callbackResponse(callback, { status: 'Not Found', message });
+    return callbackResponse(callback, { status: "Not Found", message });
   }
   const blockedSession = user.sessions[blockedSessionIndex];
 
   // Check if the session to be blocked is a main session
   if (blockedSession.main) {
-    const message = 'onSessionBlock: a main session must be demoted before blocking';
+    const message =
+      "onSessionBlock: a main session must be demoted before blocking";
     logger.err(message);
-    return callbackResponse(callback, { status: 'Not Found', message });
+    return callbackResponse(callback, { status: "Not Found", message });
   }
 
   // Add session to block list and remove bundles
@@ -64,12 +105,14 @@ async function onSessionBlock(payload: { signature: string; sessionId: string; }
   const parsedBlocklist = JSON.parse(blocklist || '{"sessions": []}');
   if (!parsedBlocklist.sessions.includes(blockedSession.IK)) {
     parsedBlocklist.sessions.push(blockedSession.IK);
-    await redisClient.set('blocklist', JSON.stringify(parsedBlocklist));
+    await redisClient.set("blocklist", JSON.stringify(parsedBlocklist));
   }
 
   // Find the blocked session's connected socket
   const sockets = await io.fetchSockets();
-  const blockedSocket = sockets.find((socket) => socket.data.sessionId === payload.sessionId);
+  const blockedSocket = sockets.find(
+    (socket) => socket.data.sessionId === payload.sessionId
+  );
   if (blockedSocket) {
     // Send a logout message to the session if connected
     blockedSocket.emit("action", { action: "logout" });
@@ -81,20 +124,22 @@ async function onSessionBlock(payload: { signature: string; sessionId: string; }
   user.sessions.splice(blockedSessionIndex, 1);
   // Update the user
   const newUser = await user.save();
-  if (!('username' in newUser)) {
-    const message = "Failed to update the user\'s session or keys";
+  if (!("username" in newUser)) {
+    const message = "Failed to update the user's session or keys";
     logger.err(message);
-    return callbackResponse(callback, { status: 'Bad Request', message });
+    return callbackResponse(callback, { status: "Bad Request", message });
   }
-
 
   // Log adding to block list
   const message = `onSessionBlock: session with #id ${socket.data.sessionId} added session with #id ${payload.sessionId} tio block`;
   logger.info(message);
 
-  return callbackResponse(callback, { status: 'Ok', message, action: "update-password" });
+  return callbackResponse(callback, {
+    status: "Ok",
+    message,
+    action: "update-password",
+  });
 }
-
 
 // **** Default export  **** //
 

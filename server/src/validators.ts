@@ -85,10 +85,13 @@ export function validKeys(arg: any, optional = false): boolean {
   return (
     exists(arg) &&
     isObject(arg) &&
-    !hasOtherThan(arg, ['IK', 'SPK', 'OPKs']) &&
-    (has(arg, 'IK', isString, optional) &&
+    !hasOtherThan(arg, ['IK', 'SIK', 'SPK', 'OPKs']) &&
+    (
+      has(arg, 'IK', isString, optional) &&
+      has(arg, 'SIK', isString, optional) && 
       has(arg, 'SPK', validSPK, optional) &&
-      has(arg, 'OPKs', validOPKs, optional, optional))
+      has(arg, 'OPKs', validOPKs, optional, optional)
+    )
   );
 }
 
@@ -99,7 +102,7 @@ export function validSession(arg: any) {
   return (
     exists(arg) &&
     isObject(arg) &&
-    (has(arg, 'IK', isString) && has(arg, 'SPK', validSPK) && has(arg, 'OPKs', validOPKs) && has(arg, 'main', isBoolean))
+    (has(arg, 'IK', isString) && has(arg, 'SIK', isString) && has(arg, 'SPK', validSPK) && has(arg, 'OPKs', validOPKs) && has(arg, 'main', isBoolean))
   );
 }
 
@@ -127,7 +130,7 @@ export function validUser(arg: any) {
 export function hasDuplicateKeys(keys: IKeyBundle, sessions: ISession[]) {
   let duplicate = false;
   sessions.forEach((s) => {
-    if (s.IK === keys.IK || s.SPK?.id === keys.SPK?.id || s.SPK?.publicKey === keys.SPK?.publicKey) { }
+    if (s.IK === keys.IK || s.SIK === keys.SIK || s.SPK?.id === keys.SPK?.id || s.SPK?.publicKey === keys.SPK?.publicKey) { }
     s.OPKs.forEach((opk_a) => {
       keys.OPKs.forEach((opk_b) => {
         opk_a.id === opk_b.id || opk_a.publicKey === opk_b.publicKey

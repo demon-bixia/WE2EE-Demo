@@ -7,9 +7,13 @@
 	import LogEntry from '$lib/components/LogEntry/LogEntry.svelte';
 	import { Icon, MagnifyingGlass } from 'svelte-hero-icons';
 
+	import '$lib/components/LogEntry/LogEntry.css';
 	import './layout.css';
 
 	const globalState = getContext<Writable<IStoreData>>('globalState');
+
+	// used to filter the log entries
+	let searchText = '';
 
 	// (event) close the protocol log
 	function handleCloseProtocolLog() {
@@ -29,7 +33,7 @@
 	>
 		<search class="search-container">
 			<div class="search-input-wrapper">
-				<input class="search-input" type="text" placeholder="Search" />
+				<input class="search-input" type="text" placeholder="Search" bind:value={searchText} />
 				<span class="search-icon">
 					<Icon style="color:rgba(0, 0, 0, 0.4);" src={MagnifyingGlass} solid size="24" />
 				</span>
@@ -38,7 +42,9 @@
 		</search>
 
 		<div class="protocol-log">
-			{#each $globalState.logEntries as entry}
+			{#each $globalState.logEntries.filter((entry) => entry.title
+					.toLowerCase()
+					.includes(searchText.toLocaleLowerCase())) as entry}
 				<LogEntry {entry} />
 			{/each}
 		</div>

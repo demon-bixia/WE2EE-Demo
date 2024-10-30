@@ -1,15 +1,19 @@
 .textarea {
-  flex: 1;
-  border: 0.0625rem solid rgba(0, 0, 0, 0.1);
-  border-radius: 1rem;
-  padding: 1rem;
-  background: var(--light-gray);
-  font-size: 1rem;
-  resize: none;
-  max-height: 3.4375rem;
-  box-sizing: border-box;
+	flex: 1;
+	border: 0.0625rem solid rgba(0, 0, 0, 0.1);
+	border-radius: 1rem;
+	padding: 1rem;
+	background: var(--light-gray);
+	font-size: 1rem;
+	resize: none;
+	max-height: 3.4375rem;
+	box-sizing: border-box;
 }
 
 .textarea:focus {
-  outline: 0.0625rem solid var(--blue);
+	outline: 0.0625rem solid var(--blue);
+}
+
+.textarea:disabled {
+	opacity: 0.5;
 }

@@ -2,16 +2,19 @@
  * Express router paths go here.
  */
 
-
 export default {
-  Base: '/api',
+  Base: "/api",
   Users: {
-    Base: '/users',
-    Get: '/:username',
-    Update: '/update',
+    Base: "/users",
+    Get: "/:username",
+    Update: "/update",
   },
   Auth: {
-    Base: '/auth',
-    GetToken: '/get-token',
-  }
+    Base: "/auth",
+    GetToken: "/get-token",
+  },
+  Test: {
+    Base: "/test",
+    ClearSessions: "/clear-sessions",
+  },
 } as const;

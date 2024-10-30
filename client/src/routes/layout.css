@@ -1,102 +1,102 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
 
 :root {
-  font-style: normal;
-  --light-blue: #EBEFFA;
-  --light-green: #E5FFE7;
-  --light-gray: #F7F7F7;
-  --light-red: #FFEAEA;
-  --blue: #597ED4;
-  --green: #00be06;
-  --red: #ff7171;
-  --dark-blue: #415C9B;
+	font-style: normal;
+	--light-blue: #ebeffa;
+	--light-green: #e5ffe7;
+	--light-gray: #f7f7f7;
+	--gray: #afafaf;
+	--light-red: #ffeaea;
+	--blue: #597ed4;
+	--green: #00be06;
+	--red: #ff7171;
+	--dark-blue: #415c9b;
 }
 
 /**** Elements ****/
 * {
-  font-family: "Inter", sans-serif;
-  box-sizing: border-box;
+	font-family: 'Inter', sans-serif;
+	box-sizing: border-box;
 }
 
 body {
-  margin: 0;
-  overflow-x: hidden;
+	margin: 0;
+	overflow-x: hidden;
 }
 
 ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
+	list-style: none;
+	padding: 0;
+	margin: 0;
 }
 
 a {
-  color: var(--blue);
+	color: var(--blue);
 }
 
 h1,
 p {
-  margin: 0;
+	margin: 0;
 }
 
 button {
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  font-size: 1rem;
-  color: rgba(0, 0, 0, 0.60);
-  line-height: 160%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 5px;
+	background: transparent;
+	border: none;
+	cursor: pointer;
+	font-size: 1rem;
+	color: rgba(0, 0, 0, 0.6);
+	line-height: 160%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 5px;
 }
 
 button:focus {
-  outline: .0625rem solid var(--blue);
+	outline: 0.0625rem solid var(--blue);
 }
 
 /**** Heading Text ****/
 
 .heading-1 {
-  font-size: 1.75rem;
-  font-weight: 600;
-  line-height: 160%;
-  color: rgba(0, 0, 0, 0.60);
-  padding: 0;
-  margin: 0;
+	font-size: 1.75rem;
+	font-weight: 600;
+	line-height: 160%;
+	color: rgba(0, 0, 0, 0.6);
+	padding: 0;
+	margin: 0;
 }
 
 .heading-2 {
-  font-size: 16px;
-  font-weight: 600;
-  line-height: 160%;
-  color: rgba(0, 0, 0, 0.60);
-  padding: 0;
-  margin: 0;
+	font-size: 16px;
+	font-weight: 600;
+	line-height: 160%;
+	color: rgba(0, 0, 0, 0.6);
+	padding: 0;
+	margin: 0;
 }
-
 
 /**** Body Text ****/
 
 .body-1 {
-  font-size: 1rem;
-  font-weight: 400;
-  line-height: 160%;
-  color: rgba(0, 0, 0, 0.60);
+	font-size: 1rem;
+	font-weight: 400;
+	line-height: 160%;
+	color: rgba(0, 0, 0, 0.6);
 }
 
 .body-2 {
-  font-size: 1.25rem;
-  font-weight: 400;
-  line-height: 160%;
-  margin: 0;
-  color: rgba(0, 0, 0, 0.60);
+	font-size: 1.25rem;
+	font-weight: 400;
+	line-height: 160%;
+	margin: 0;
+	color: rgba(0, 0, 0, 0.6);
 }
 
 .page-loading-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  width: 100%;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	height: 100vh;
+	width: 100%;
 }

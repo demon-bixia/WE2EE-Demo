@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { KeyPair, SharedSecret, ReceivedKeyBundle } from '$lib/WE2EE/types';
+	import type { KeyPair, SharedSecret } from '$lib/WE2EE/types';
 	import type { Writable } from 'svelte/store';
 	import type {
 		IECDHMessage,
@@ -11,7 +11,7 @@
 	} from '../../../types';
 
 	import Protocol from '$lib/WE2EE';
-	import { base64ToBuffer } from '$lib/WE2EE/encoding';
+	import { base64ToBuffer, stringToBuffer } from '$lib/WE2EE/encoding';
 	import { getContext } from 'svelte';
 
 	const globalState = getContext<Writable<IStoreData>>('globalState');
@@ -22,9 +22,22 @@
 	/**
 	 *	Decrypts a message, derives a key, and stores it.
 	 */
-	async function receiveMessage(message: ITextMessage | IECDHMessage | IUpdateMessage) {
+	async function receiveMessage(message: ITextMessage | IECDHMessage) {
 		if (!$globalState.user) {
 			throw new Error('There is no authenticated user');
+		}
+
+		// Verify the signature of the message
+		const { signature, ...unsignedMessage } = message;
+		const encodedMessage = stringToBuffer(JSON.stringify(unsignedMessage));
+		const messageHash = await $protocol.hash(encodedMessage);
+		const verified = await $protocol.verify(
+			base64ToBuffer(message.SIK),
+			base64ToBuffer(signature),
+			messageHash
+		);
+		if (!verified) {
+			throw new Error('message verification failure');
 		}
 
 		// Process the message
@@ -50,6 +63,7 @@
 			{ name: 'SSs', filters: { IK: message.IK } },
 			{ name: 'IK' }
 		]);
+
 		if (!storeQueryResult || !storeQueryResult.SSs || !storeQueryResult.IK) {
 			throw new Error('SSs or IK not found');
 		}
@@ -73,9 +87,10 @@
 		log({
 			title: 'Decrypted a message',
 			more: {
-				to: message.to,
-				from: message.from,
-				message: content
+				to: { value: message.to, preview: 'start' },
+				from: { value: message.from, preview: 'start' },
+				decryptedMessage: { value: content, preview: 'start' },
+				message: { value: message.content, preview: 'end' }
 			}
 		});
 
@@ -124,9 +139,10 @@
 			log({
 				title: 'Received a message',
 				more: {
-					to: message.to,
-					from: message.from,
-					message: content
+					to: { value: message.to, preview: 'start' },
+					from: { value: message.from, preview: 'start' },
+					decryptedMessage: { value: content, preview: 'start' },
+					message: { value: message.content, preview: 'end' }
 				}
 			});
 		}

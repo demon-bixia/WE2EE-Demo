@@ -1,201 +1,201 @@
-.page-container {
-  background: url('../../assets/vectors/doodles/x-pattern.svg');
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: space-between;
-  height: 100vh;
+.login-container {
+	background: url('../../assets/vectors/doodles/x-pattern.svg');
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: space-between;
+	height: 100vh;
 }
 
 .shape {
-  position: absolute;
-  z-index: -1;
+	position: absolute;
+	z-index: -1;
 }
 
 .shape.circle-left {
-  left: 1%;
-  top: 55%;
+	left: 1%;
+	top: 55%;
 }
 
 .shape.circle-right {
-  left: 75%;
-  top: 15%;
+	left: 75%;
+	top: 15%;
 }
 
 .shape.triangle-left {
-  left: 14.7%;
-  top: 10%;
+	left: 14.7%;
+	top: 10%;
 }
 
 .shape.triangle-right {
-  left: 88%;
-  top: 47%;
+	left: 88%;
+	top: 47%;
 }
 
-.page-header {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 60%;
-  padding-top: 2rem;
+.login-header {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	width: 60%;
+	padding-top: 2rem;
 }
 
-.title {
-  text-align: center;
-  margin-bottom: 0.75rem;
+.login-title {
+	text-align: center;
+	margin-bottom: 0.75rem;
 }
 
-.description {
-  text-align: center;
+.login-description {
+	text-align: center;
 }
 
-.login-container {
-  flex: 1;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 9.375rem;
+.login-cards {
+	flex: 1;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	gap: 9.375rem;
 }
 
 .grid-pattern-wrapper {
-  position: relative;
+	position: relative;
 }
 
 .account {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  border-radius: 0.75rem;
-  padding: 2.5rem 4.375rem;
-  box-shadow: 0 0.3125rem 0.9375rem rgba(0, 0, 0, 0.1);
-  transition: box-shadow 200ms ease;
-  background: #ffffff;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	border-radius: 0.75rem;
+	padding: 2.5rem 4.375rem;
+	box-shadow: 0 0.3125rem 0.9375rem rgba(0, 0, 0, 0.1);
+	transition: box-shadow 200ms ease;
+	background: #ffffff;
 }
 
 .account:hover {
-  box-shadow: 0 0.625rem 1.875rem rgba(0, 0, 0, 0.2);
+	box-shadow: 0 0.625rem 1.875rem rgba(0, 0, 0, 0.2);
 }
 
 .account .avatar,
 .account .name {
-  margin-bottom: 1.5rem;
+	margin-bottom: 1.5rem;
 }
 
 .grid-pattern-1 {
-  position: absolute;
-  z-index: -1;
-  bottom: 73%;
-  right: 10%;
+	position: absolute;
+	z-index: -1;
+	bottom: 73%;
+	right: 10%;
 }
 
 .grid-pattern-2 {
-  position: absolute;
-  z-index: -1;
-  top: 73%;
-  left: 10%;
+	position: absolute;
+	z-index: -1;
+	top: 73%;
+	left: 10%;
 }
 
 .footer-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 1.5rem 0rem;
-  width: 100%;
-  border-top: 0.0625rem solid rgba(0, 0, 0, 0.1);
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	padding: 1.5rem 0rem;
+	width: 100%;
+	border-top: 0.0625rem solid rgba(0, 0, 0, 0.1);
 }
 
 /**** Tablet Screens ****/
 @media only screen and (width < 56.25rem) {
-  .shape.circle-left {
-    left: 0;
-    top: 73%;
-  }
+	.shape.circle-left {
+		left: 0;
+		top: 73%;
+	}
 
-  .shape.circle-right {
-    left: 75%;
-    top: 15%;
-  }
+	.shape.circle-right {
+		left: 75%;
+		top: 15%;
+	}
 
-  .shape.triangle-left {
-    left: 10%;
-    top: 10%;
-  }
+	.shape.triangle-left {
+		left: 10%;
+		top: 10%;
+	}
 
-  .shape.triangle-right {
-    left: 83.5%;
-    top: 47%;
-  }
+	.shape.triangle-right {
+		left: 83.5%;
+		top: 47%;
+	}
 }
 
 /**** Mobile Screens ****/
 @media only screen and (width < 37.5rem) {
-  .page-container {
-    padding: 1rem;
-    box-sizing: border-box;
-  }
+	.login-container {
+		padding: 1rem;
+		box-sizing: border-box;
+	}
 
-  .page-header {
-    width: 100%;
-  }
+	.login-header {
+		width: 100%;
+	}
 
-  .login-container {
-    flex-direction: column;
-    gap: 1.5rem;
-    width: 100%;
-  }
+	.login-container {
+		flex-direction: column;
+		gap: 1.5rem;
+		width: 100%;
+	}
 
-  .login-container .grid-pattern-wrapper {
-    width: 100%;
-  }
+	.login-container .grid-pattern-wrapper {
+		width: 100%;
+	}
 
-  .account {
-    flex-direction: row;
-    justify-content: start;
-    align-items: center;
-    padding: 1.75rem 1.5rem;
-    width: 100%;
-  }
+	.account {
+		flex-direction: row;
+		justify-content: start;
+		align-items: center;
+		padding: 1.75rem 1.5rem;
+		width: 100%;
+	}
 
-  .account .avatar,
-  .account .name {
-    margin-bottom: 0;
-  }
+	.account .avatar,
+	.account .name {
+		margin-bottom: 0;
+	}
 
-  .account .avatar {
-    width: 3.125rem;
-    margin-right: 1.5rem;
-  }
+	.account .avatar {
+		width: 3.125rem;
+		margin-right: 1.5rem;
+	}
 
-  .account .name {
-    margin-right: auto;
-  }
+	.account .name {
+		margin-right: auto;
+	}
 
-  .grid-pattern-1 {
-    top: 55%;
-    right: 15%;
-  }
+	.grid-pattern-1 {
+		top: 55%;
+		right: 15%;
+	}
 
-  .grid-pattern-2 {
-    display: none;
-  }
+	.grid-pattern-2 {
+		display: none;
+	}
 
-  .shape.circle-left {
-    left: 0;
-    top: 78%;
-  }
+	.shape.circle-left {
+		left: 0;
+		top: 78%;
+	}
 
-  .shape.circle-right {
-    left: 50%;
-    top: 35%;
-  }
+	.shape.circle-right {
+		left: 50%;
+		top: 35%;
+	}
 
-  .shape.triangle-left {
-    left: 0;
-    top: 25%;
-  }
+	.shape.triangle-left {
+		left: 0;
+		top: 25%;
+	}
 
-  .shape.triangle-right {
-    left: 60%;
-    top: 70%;
-  }
+	.shape.triangle-right {
+		left: 60%;
+		top: 70%;
+	}
 }

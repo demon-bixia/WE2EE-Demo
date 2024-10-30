@@ -19,6 +19,7 @@
 		// if the user is logging connect to socket server.
 		if ($globalState.user && $globalState.user.authToken) {
 			$socketClient.socket = io('http://localhost:3000', {
+				transports: ['polling', 'websocket'],
 				extraHeaders: { authorization: `bearer ${$globalState.user.authToken}` }
 			});
 
@@ -27,7 +28,12 @@
 			$socketClient.socket.on('connect', async () => {
 				// Log Connection
 				console.log('connected to socket server');
-				if ($globalState.user && $globalState.user.authToken && $socketClient.setupKeys) {
+				if (
+					$globalState.user &&
+					$globalState.user.authToken &&
+					$socketClient.setupKeys &&
+					$socketClient.checkForKeys
+				) {
 					// Create the protocol instance.
 					$protocol = new Protocol(
 						`${$globalState.user.username}`,
@@ -40,6 +46,8 @@
 						try {
 							// Remove the error dialog
 							$globalState.IDBPermissionDenied = false;
+							// Check if the other user has keys
+							await $socketClient.checkForKeys();
 							// Setup keys.
 							await $socketClient.setupKeys();
 						} catch (error) {
@@ -70,13 +78,18 @@
 					$socketClient.disconnect();
 				}
 			});
-
 			// (event) handles receiving a list of messages that were queued in the server
 			$socketClient.socket.on('queued-messages', (messages: (ITextMessage | IECDHMessage)[]) => {
 				if ($socketClient.receiveMessage) {
 					for (let message of messages) {
 						$socketClient.receiveMessage(message);
 					}
+				}
+			});
+			// (event) handles allowing the user to send when the other user has publised some keys
+			$socketClient.socket.on('can-send', (data: { canSend: boolean }) => {
+				if (data.canSend) {
+					$globalState.canSend = data.canSend;
 				}
 			});
 			// (event) handles logging disconnections
@@ -100,7 +113,8 @@
 			logEntries: [],
 			messages: [],
 			personalSessions: [],
-			verificationCodes: []
+			verificationCodes: [],
+			canSend: false
 		});
 
 		if ($socketClient.socket) {

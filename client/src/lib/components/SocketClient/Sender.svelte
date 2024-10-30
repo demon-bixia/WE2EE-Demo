@@ -11,12 +11,13 @@
 	} from '../../../types';
 
 	import Protocol from '$lib/WE2EE';
-	import { bufferToBase64 } from '$lib/WE2EE/encoding';
+	import { bufferToBase64, stringToBuffer } from '$lib/WE2EE/encoding';
 	import { getContext } from 'svelte';
 
 	// **** Types **** //
 	interface IStoreQueryResult {
 		IK: KeyPair;
+		SIK: KeyPair;
 		SSs: SharedSecret[];
 	}
 
@@ -45,6 +46,7 @@
 		// Search for your IK and the SS of the user you want to communicate with.
 		const storeQueryResult = await $protocol.store.getKeys<IStoreQueryResult>([
 			{ name: 'IK' },
+			{ name: 'SIK' },
 			{ name: 'SSs', filters: { username: to } }
 		]);
 
@@ -61,6 +63,7 @@
 				to,
 				(storeQueryResult as IStoreQueryResult).SSs,
 				(storeQueryResult as IStoreQueryResult).IK,
+				(storeQueryResult as IStoreQueryResult).SIK,
 				true,
 				content
 			);
@@ -87,6 +90,7 @@
 						to,
 						DHResults,
 						(storeQueryResult as IStoreQueryResult).IK,
+						(storeQueryResult as IStoreQueryResult).SIK,
 						!saved,
 						content
 					);
@@ -117,6 +121,7 @@
 		to: string,
 		keys: SharedSecret[] | DHResult[] | (SharedSecret | DHResult)[],
 		IK: KeyPair,
+		SIK: KeyPair,
 		save: boolean,
 		content?: string,
 		extraData?: any
@@ -135,6 +140,7 @@
 				subject,
 				to,
 				IK,
+				SIK,
 				value,
 				knownSessions,
 				content,
@@ -156,17 +162,18 @@
 							needSave = false;
 							// Log sending the message.
 							log({
-								title: 'Sent initial message',
+								title: 'Sent message',
 								more: {
-									subject: subject,
-									message: content,
-									receiverId: receiverID
+									subject: { value: subject, preview: 'start' },
+									message: { value: content, preview: 'end' },
+									encryptedMessage: { value: message.content, preview: 'end' },
+									receiverId: { value: receiverID, preview: 'end' }
 								}
 							});
 						}
 
 						if (needFroward && content) {
-							const forwarded = await forwardMessage(message, IK, content);
+							const forwarded = await forwardMessage(message, IK, SIK, content);
 							needFroward = forwarded;
 						}
 					}
@@ -208,6 +215,7 @@
 		subject: TMessageTypes,
 		to: string,
 		IK: KeyPair,
+		SIK: KeyPair,
 		SS: SharedSecret | DHResult,
 		knownSessions: string[],
 		content?: string,
@@ -225,6 +233,7 @@
 			from: $globalState.user.username,
 			timestamp: currentDate,
 			IK: bufferToBase64(IK.publicKey),
+			SIK: bufferToBase64(SIK.publicKey),
 			knownSessions: knownSessions
 		};
 
@@ -236,8 +245,10 @@
 			message['iv'] = bufferToBase64(IV);
 		}
 
+		// construct the message
+		let unsignedMessage;
 		if (subject === 'ecdh') {
-			return {
+			unsignedMessage = {
 				...message,
 				salt: bufferToBase64(SS.salt),
 				EK: bufferToBase64((SS as DHResult).EK),
@@ -245,8 +256,16 @@
 				OPK_ID: (SS as DHResult).OPK_ID
 			};
 		} else {
-			return { ...message, ...extraData };
+			unsignedMessage = { ...message, ...extraData };
 		}
+
+		// create sign the content of the message using the identity signature private key
+		const encodedMessage = stringToBuffer(JSON.stringify(unsignedMessage));
+		const hashOfMessage = await $protocol.hash(encodedMessage);
+		const signature = await $protocol.sign(SIK.privateKey, hashOfMessage);
+
+		// return signed message
+		return { ...unsignedMessage, signature: bufferToBase64(signature) };
 	}
 
 	/**
@@ -255,6 +274,7 @@
 	async function forwardMessage(
 		message: IInitialMessage | ITextMessage,
 		IK: KeyPair,
+		SIK: KeyPair,
 		content: string
 	) {
 		if (!$globalState.user || !$socketClient.socket) {
@@ -285,6 +305,7 @@
 						'forward',
 						message.to,
 						IK,
+						SIK,
 						SS,
 						message.knownSessions,
 						content

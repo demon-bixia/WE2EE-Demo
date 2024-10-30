@@ -1,121 +1,125 @@
-	.chat {
-		display: flex;
-		flex-direction: column;
-		border-right: 0.0625rem solid rgba(0, 0, 0, 0.1);
-		flex: 1;
-	}
+.chat {
+	display: flex;
+	flex-direction: column;
+	border-right: 0.0625rem solid rgba(0, 0, 0, 0.1);
+	flex: 1;
+}
 
-	.chat .top {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		padding: 1rem 1.5rem;
-		border-bottom: 0.0625rem solid rgba(0, 0, 0, 0.1);
-	}
+.chat .top {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 1rem 1.5rem;
+	border-bottom: 0.0625rem solid rgba(0, 0, 0, 0.1);
+}
 
-	.chat .top .contact-info {
-		display: flex;
-		gap: 1.5rem;
-	}
+.chat .top .contact-info {
+	display: flex;
+	gap: 1.5rem;
+}
 
-	.chat .top .contact-info .avatar {
-		width: 3.125rem;
-		height: 3.125rem;
-	}
+.chat .top .contact-info .avatar {
+	width: 3.125rem;
+	height: 3.125rem;
+}
 
-	.chat .top .contact-info .name {
-		margin-bottom: 0.25rem;
-	}
+.chat .top .contact-info .name {
+	margin-bottom: 0.25rem;
+}
 
-	.chat .top .contact-info .status {
-		color: rgba(0, 0, 0, 0.4);
-	}
+.chat .top .contact-info .status {
+	color: rgba(0, 0, 0, 0.4);
+}
 
-	.chat .top .contact-info .status.online {
-		color: var(--green);
-	}
+.chat .top .contact-info .status.online {
+	color: var(--green);
+}
 
-	.chat .top .dropdown-menu-wrapper {
-		position: relative;
-	}
+.chat .top .dropdown-menu-wrapper {
+	position: relative;
+}
 
-	.chat .top .dropdown-menu-wrapper .menu-button {
-		border: 0.0625rem solid rgba(0, 0, 0, 0.1);
-		border-radius: 1rem;
-		width: 2.8125rem;
-		height: 2.8125rem;
-	}
+.chat .top .dropdown-menu-wrapper .menu-button {
+	border: 0.0625rem solid rgba(0, 0, 0, 0.1);
+	border-radius: 1rem;
+	width: 2.8125rem;
+	height: 2.8125rem;
+}
 
+.chat .top .dropdown-menu-wrapper .dropdown-menu .menu-item.protocol-button {
+	display: none;
+}
+
+.chat .middle {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	padding: 1.5rem;
+	overflow-y: auto;
+	gap: 1.5rem;
+}
+
+.chat .middle .message {
+	padding: 1rem;
+	max-width: 60%;
+	border-radius: 0.75rem;
+	align-self: start;
+	background: var(--light-green);
+}
+
+.chat .middle .message.self {
+	align-self: end;
+	background: var(--light-blue);
+}
+
+.chat .bottom {
+	display: flex;
+	gap: 2rem;
+	justify-content: space-between;
+	padding: 1rem 1.5rem;
+	border-top: 0.0625rem solid rgba(0, 0, 0, 0.1);
+}
+
+.chat .bottom .send-button {
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+	padding: 0.75rem;
+	border-radius: 1rem;
+	color: #ffffff;
+	background: var(--blue);
+	font-size: 1rem;
+	transition: all 200ms ease;
+}
+
+.chat .bottom .send-button:hover {
+	background: var(--dark-blue);
+}
+
+.chat .bottom .send-button:focus {
+	outline: none;
+	box-shadow: 0 0 0.0625rem 0.1875rem rgba(89, 126, 212, 0.5);
+}
+
+.chat .bottom .send-button:disabled {
+	background-color: var(--gray);
+	cursor: not-allowed;
+}
+
+/**** Tablet Screens ****/
+@media only screen and (width < 56.25rem) {
 	.chat .top .dropdown-menu-wrapper .dropdown-menu .menu-item.protocol-button {
-		display: none;
+		display: block;
 	}
 
-	.chat .middle {
-		flex: 1;
-		display: flex;
-		flex-direction: column;
-		padding: 1.5rem;
-		overflow-y: auto;
-		gap: 1.5rem;
+	.chat .bottom .message-input {
+		height: fit-content;
 	}
+}
 
-	.chat .middle .message {
-		padding: 1rem;
-		max-width: 60%;
-		border-radius: 0.75rem;
-		align-self: start;
-		background: var(--light-green);
+/**** Mobile Screens ****/
+@media only screen and (width < 37.5rem) {
+	.chat .bottom .message-input {
+		height: fit-content;
 	}
-
-	.chat .middle .message.self {
-		align-self: end;
-		background: var(--light-blue);
-	}
-
-	.chat .bottom {
-		display: flex;
-		gap: 2rem;
-		justify-content: space-between;
-		padding: 1rem 1.5rem;
-		border-top: 0.0625rem solid rgba(0, 0, 0, 0.1);
-	}
-
-	.chat .bottom .send-button {
-		display: flex;
-		align-items: center;
-		gap: 0.75rem;
-		padding: 0.75rem;
-		border-radius: 1rem;
-		color: #ffffff;
-		background: var(--blue);
-		font-size: 1rem;
-		transition: all 200ms ease;
-	}
-
-	.chat .bottom .send-button:hover {
-		background: var(--dark-blue);
-	}
-
-	.chat .bottom .send-button:focus {
-		outline: none;
-		box-shadow: 0 0 0.0625rem 0.1875rem rgba(89, 126, 212, 0.5);
-	}
-
-
-	/**** Tablet Screens ****/
-	@media only screen and (width < 56.25rem) {
-		.chat .top .dropdown-menu-wrapper .dropdown-menu .menu-item.protocol-button {
-			display: block;
-		}
-
-		.chat .bottom .message-input {
-			height: fit-content;
-		}
-	}
-
-	/**** Mobile Screens ****/
-	@media only screen and (width < 37.5rem) {
-		.chat .bottom .message-input {
-			height: fit-content;
-		}
-	}
+}

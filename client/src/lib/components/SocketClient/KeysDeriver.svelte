@@ -10,6 +10,7 @@
 	const globalState = getContext<Writable<IStoreData>>('globalState');
 	const socketClient = getContext<Writable<ISocketClient>>('socketClient');
 	const protocol = getContext<Writable<Protocol>>('protocol');
+	const log = getContext<(logEntry: any) => void>('log');
 
 	/**
 	 * Derives shared secrets from all the session
@@ -37,9 +38,9 @@
 		const SS: SharedSecret = {
 			username: username,
 			IK: session.IK,
+			SIK: session.SIK,
 			SK: DHResult.SK,
-			AD: DHResult.AD,
-			salt: DHResult.salt
+			AD: DHResult.AD
 		};
 
 		// Save the shared secret
@@ -51,6 +52,17 @@
 		} else {
 			await $protocol.store.updateKeys({ SSs: [SS] });
 		}
+
+		// Log deriving from bundle.
+		log({
+			title: 'Derived from key bundle',
+			more: {
+				DH1: { value: DHResult.DH1, preview: 'end' },
+				DH2: { value: DHResult.DH2, preview: 'end' },
+				DH3: { value: DHResult.DH3, preview: 'end' },
+				DH4: { value: DHResult.DH4, preview: 'end' }
+			}
+		});
 
 		// Add the associated data to the verification codes array
 		addVerificationCode(SS);
@@ -65,10 +77,10 @@
 	async function deriveFromMessage(message: IECDHMessage) {
 		// derive a new SK
 		const DHResult = await $protocol.deriveFromInitialMessage(message);
-		const SS = {
+		const SS: SharedSecret = {
 			username: message.from,
 			IK: message.IK,
-			salt: DHResult.salt,
+			SIK: message.SIK,
 			SK: DHResult.SK,
 			AD: DHResult.AD
 		};
@@ -83,8 +95,24 @@
 			await $protocol.store.updateKeys({ SSs: [SS] });
 		}
 
+		// Log deriving from initial message.
+		log({
+			title: 'Derived from initial message',
+			more: {
+				DH1: { value: DHResult.DH1, preview: 'end' },
+				DH2: { value: DHResult.DH2, preview: 'end' },
+				DH3: { value: DHResult.DH3, preview: 'end' },
+				DH4: { value: DHResult.DH4, preview: 'end' }
+			}
+		});
+
 		// Add the associated data to the verification codes array
 		addVerificationCode(SS);
+
+		// if the bundle is derived form an session owned by this user update the owned sessions
+		if ($globalState.user?.username === message.from && $socketClient.getPersonalSessions) {
+			$socketClient.getPersonalSessions();
+		}
 
 		return DHResult;
 	}
@@ -107,11 +135,16 @@
 				]
 			};
 		} else {
-			$globalState.verificationCodes.push({
-				username: SS.username,
-				codes: [bufferToDecimalArray(SS.AD).slice(-20, -9).join(' ')]
-			});
+			$globalState.verificationCodes = [
+				...$globalState.verificationCodes,
+				{
+					username: SS.username,
+					codes: [bufferToDecimalArray(SS.AD).slice(-20, -9).join(' ')]
+				}
+			];
 		}
+
+		console.log($globalState.verificationCodes);
 	}
 	$socketClient.addVerificationCode = addVerificationCode;
 </script>

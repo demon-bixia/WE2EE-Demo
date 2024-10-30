@@ -58,22 +58,22 @@
 	}
 </script>
 
-<section class="page-container">
+<section class="login-container">
 	<img class="shape circle-left" src={Circle} alt="circle shape" />
 	<img class="shape circle-right" src={Circle} alt="circle shape" />
 	<img class="shape triangle-left" src={Triangle} alt="triangle shape" />
 	<img class="shape triangle-right" src={Triangle} alt="triangle shape" />
 
-	<header class="page-header">
-		<h1 class="heading-1 title">Select Your Profile</h1>
-		<p class="body-1 description">
+	<header class="login-header">
+		<h1 class="heading-1 login-title">Select Your Profile</h1>
+		<p class="body-1 login-description" style="text-align: center;">
 			Select either Alice or Bob to begin testing messaging you can always change the profile later
 			by exiting the app. the first session you login the browser session will be set as the main
 			session.
 		</p>
 	</header>
 
-	<div class="login-container">
+	<div class="login-cards">
 		<div class="grid-pattern-wrapper">
 			<button
 				on:click={async () => await handleGetToken('Alice')}

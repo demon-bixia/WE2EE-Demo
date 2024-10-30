@@ -35,18 +35,21 @@ export interface IInitialMessage extends IMessage {
 
 export interface IKeyBundle {
   IK?: string;
+  SIK?: string;
   SPK?: IKeyWithId;
   OPKs: IKeyWithId[];
 }
 
 export interface IReceivedKeyBundle {
   IK?: string;
+  SIK?: string;
   SPK?: IKeyWithId;
   OPK?: IKeyWithId;
 }
 
 export interface CompleteKeyBundle {
   IK: string;
+  SIK: string;
   SPK: IKeyWithId;
   OPKs: IKeyWithId[];
 }
@@ -62,6 +65,7 @@ export interface IKeyWithId {
 
 export interface ISession {
   IK: string;
+  SIK: string;
   SPK: IKeyWithId;
   OPKs: IKeyWithId[];
   main: boolean;

@@ -17,7 +17,8 @@
 		logEntries: [],
 		messages: [],
 		personalSessions: [],
-		verificationCodes: []
+		verificationCodes: [],
+		canSend: false
 	});
 	setContext('globalState', globalState);
 
@@ -32,7 +33,7 @@
 		globalState.set({
 			...$globalState,
 			logEntries: [...$globalState.logEntries, { time: formattedTime, ...logEntry }]
-		});
+		} as any);
 	}
 	setContext('log', log);
 
@@ -50,7 +51,8 @@
 
 		// If user is not authenticated then redirect to /login
 		if (!$globalState.user && window.location.pathname !== '/login') await goto('/login');
-		else if ($globalState.user && window.location.pathname !== '/chat') await goto('/chat');
+		else if ($globalState.user && !['/playground', '/chat'].includes(window.location.pathname))
+			await goto('/chat');
 
 		// stop loading after a second of redirecting
 		setTimeout(() => {
